@@ -237,16 +237,16 @@ namespace PersistentMapClient {
                 if (companyObject != null && Fields.currentMap != null) {
                     TextMeshProUGUI companietext = companyObject.transform.FindRecursive("txt-owner").GetComponent<TextMeshProUGUI>();
                     PersistentMapAPI.System system = Fields.currentMap.systems.FirstOrDefault(x => x.name.Equals(___starSystem.Name));
-                    if (system != null && companietext != null) {
-                        List<string> companyNames = new List<string>();
-                        foreach (Company company in system.companies) {
-                            companyNames.Add("(" + Helper.GetFactionShortName(company.Faction, ___simState.DataManager) + ") " + company.Name);
-                        }
-                        companietext.SetText(string.Join(Environment.NewLine, companyNames.ToArray()));
-                    }
-                    else {
-                        companietext.SetText("");
-                    }
+                    //if (system != null && companietext != null) {
+                    //    List<string> companyNames = new List<string>();
+                    //    foreach (Company company in system.companies) {
+                    //        companyNames.Add("(" + Helper.GetFactionShortName(company.Faction, ___simState.DataManager) + ") " + company.Name);
+                    //    }
+                    //    companietext.SetText(string.Join(Environment.NewLine, companyNames.ToArray()));
+                    //}
+                    //else {
+                    companietext.SetText("");
+                    //}
 
                 }
             }
@@ -297,8 +297,8 @@ namespace PersistentMapClient {
                         if (system2.Tags == null) {
                             PersistentMapClient.Logger.Log(system2.Name + ": Has no Tags");
                         }
-                        Faction newOwner = system.controlList.OrderByDescending(x => x.percentage).First().faction;
-                        Faction oldOwner = system2.Owner;
+                        FactionValue newOwner = system.controlList.OrderByDescending(x => x.percentage).First().faction;
+                        FactionValue oldOwner = system2.Owner;
                         // Update control to the new faction
                         methodSetOwner.Invoke(system2.Def, new object[] { newOwner });
                         system2.Tags.Remove(Helper.GetFactionTag(oldOwner));
@@ -319,9 +319,7 @@ namespace PersistentMapClient {
 
                         // If the owner changes, add a notice to the player and mark neighbors for contract updates
                         if (newOwner != oldOwner) {
-                            string newOwnerName = Helper.GetFactionShortName(newOwner, simGame.DataManager);
-                            string oldOwnerName = Helper.GetFactionShortName(oldOwner, simGame.DataManager);
-                            changeNotifications.Add($"{newOwnerName} took {system2.Name} from {oldOwnerName}");
+                            changeNotifications.Add($"{newOwner.Name} took {system2.Name} from {oldOwner.Name}");
                             foreach (StarSystem changedSystem in simGame.Starmap.GetAvailableNeighborSystem(system2)) {
                                 if (!transitiveContractUpdateTargets.Contains(changedSystem)) {
                                     transitiveContractUpdateTargets.Add(changedSystem);

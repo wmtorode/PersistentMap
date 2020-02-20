@@ -5,30 +5,30 @@ using System.Linq;
 
 namespace PersistentMapAPI {
     public class System {
-        public List<FactionControl> controlList;
+        public List<FactionControl> factions;
         public string name;
-        public int activePlayers;
-        public List<Company> companies;
+        public int Players;
+        public string owner;
 
-        public FactionControl FindFactionControlByFaction(Faction faction) {
-            if(controlList == null) {
-                controlList = new List<FactionControl>();
+        public FactionControl FindFactionControlByFaction(string faction) {
+            if(factions == null) {
+                factions = new List<FactionControl>();
             }
-            FactionControl result = controlList.Find(x => x.faction == faction);
+            FactionControl result = factions.Find(x => x.Name == faction);
             if(result == null) {
                 result = new FactionControl();
-                result.faction = faction;
-                result.percentage = 0;
-                controlList.Add(result);
+                result.Name = faction;
+                result.control = 0;
+                factions.Add(result);
             }
             return result;
         }
 
         public FactionControl FindHighestControl() {
-            if (controlList == null) {
-                controlList = new List<FactionControl>();
+            if (factions == null) {
+                factions = new List<FactionControl>();
             }
-            FactionControl result = controlList.OrderByDescending(x => x.percentage).First();
+            FactionControl result = factions.OrderByDescending(x => x.control).First();
             return result;
         }
     }

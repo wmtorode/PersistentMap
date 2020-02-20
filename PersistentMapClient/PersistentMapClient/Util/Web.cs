@@ -19,7 +19,7 @@ namespace PersistentMapClient {
         }        
 
         // Pulls the inventory for the specified faction
-        public static List<ShopDefItem> GetShopForFaction(Faction faction) {
+        public static List<ShopDefItem> GetShopForFaction(FactionValue faction) {
             try {
 
                 HttpWebRequest request = new RequestBuilder(WarService.GetFactionShop).Faction(faction).Build();
@@ -40,7 +40,7 @@ namespace PersistentMapClient {
         }
 
         // Send any salvage the user didn't want to the faction inventory
-        public static bool PostUnusedSalvage(List<SalvageDef> ___finalPotentialSalvage, Faction faction) {
+        public static bool PostUnusedSalvage(List<SalvageDef> ___finalPotentialSalvage, FactionValue faction) {
             List<ShopDefItem> items = new List<ShopDefItem>();
             foreach (SalvageDef salvage in ___finalPotentialSalvage) {
                 ShopDefItem item = new ShopDefItem();
@@ -88,7 +88,7 @@ namespace PersistentMapClient {
         }
 
         // Anything the user sells goes into faction inventory as well.
-        public static bool PostSoldItems(List<ShopDefItem> items, Faction faction) {
+        public static bool PostSoldItems(List<ShopDefItem> items, FactionValue faction) {
             foreach (ShopDefItem item in items) {
                 item.DiscountModifier = 1f;
                 item.Count = 1;
@@ -104,7 +104,7 @@ namespace PersistentMapClient {
         }
 
         // Send a list of items to purchase from the faction store
-        public static bool PostBuyItems(List<string> ids, Faction owner) {
+        public static bool PostBuyItems(List<string> ids, FactionValue owner) {
             try {
                 string testjson = JsonConvert.SerializeObject(ids);
                 HttpWebRequest request = new RequestBuilder(WarService.PostBuyItems).Faction(owner).PostData(testjson).Build();
@@ -178,8 +178,8 @@ namespace PersistentMapClient {
                 this._service = service;
             }
 
-            public RequestBuilder Faction(Faction faction) {
-                _faction = faction.ToString();
+            public RequestBuilder Faction(FactionValue faction) {
+                _faction = faction.Name;
                 return this;
             }
 
@@ -213,7 +213,7 @@ namespace PersistentMapClient {
                         break;
                     case WarService.GetStarMap:
                     default:
-                        _requestUrl = $"{Fields.settings.ServerURL}warServices/StarMap/";
+                        _requestUrl = $"{Fields.settings.ServerURL}api/roguewarservices/getmap";
                         _requestMethod = "GET";
                         break;
                 }

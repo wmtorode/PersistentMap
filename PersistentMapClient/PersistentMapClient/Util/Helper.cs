@@ -40,8 +40,8 @@ namespace PersistentMapClient {
             return Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2));
         }
 
-        public static Faction getfaction(string faction) {
-            return (Faction)Enum.Parse(typeof(Faction), faction, true);
+        public static FactionValue getfaction(string faction) {
+            return FactionEnumeration.GetFactionByName(faction);
         }
 
         public static bool MeetsNewReqs(StarSystem instance, TagSet reqTags, TagSet exTags, TagSet curTags) {
@@ -92,16 +92,6 @@ namespace PersistentMapClient {
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);
                 return false;
-            }
-        }
-
-        public static string GetFactionShortName(Faction faction, DataManager manager) {
-            try {
-                return FactionDef.GetFactionDefByEnum(manager, faction).ShortName.Replace("the ", "").Replace("The ", "");
-            }
-            catch (Exception ex) {
-                PersistentMapClient.Logger.LogError(ex);
-                return null;
             }
         }
 
@@ -174,16 +164,16 @@ namespace PersistentMapClient {
             try {
                 bool result = false;
                 if (Sim.Starmap != null) {
-                    if (system.Owner != Faction.NoFaction) {
+                    if (system.OwnerValue != FactionEnumeration.GetNoFactionValue()) {
                         foreach (StarSystem neigbourSystem in Sim.Starmap.GetAvailableNeighborSystem(system)) {
-                            if (system.Owner != neigbourSystem.Owner && neigbourSystem.Owner != Faction.NoFaction) {
+                            if (system.OwnerValue != neigbourSystem.OwnerValue && neigbourSystem.OwnerValue != FactionEnumeration.GetNoFactionValue()) {
                                 result = true;
                                 break;
                             }
                         }
                     }
                 }
-                if (!result && capitalsBySystemName.Contains(system.Name) && !IsCapital(system, system.Owner)) {
+                if (!result && capitalsBySystemName.Contains(system.Name) && !IsCapital(system, system.OwnerValue.Name)) {
                     result = true;
                 }
                 return result;
@@ -199,9 +189,9 @@ namespace PersistentMapClient {
                 if (IsBorder(system, Sim)) {
                     List<string> factionList = new List<string>();
                     factionList.Add("Current Control:");
-                    foreach (FactionControl fc in warsystem.controlList) {
-                        if (fc.percentage != 0) {
-                            factionList.Add(GetFactionName(fc.faction, Sim.DataManager) + ": " + fc.percentage + "%");
+                    foreach (FactionControl fc in warsystem.factions) {
+                        if (fc.control != 0) {
+                            factionList.Add(GetFactionName(fc.Name) + ": " + fc.control + "%");
                         }
                     }
                     if (!Fields.FluffDescriptions.ContainsKey(system.Name)) {
@@ -221,9 +211,9 @@ namespace PersistentMapClient {
             }
         }
 
-        public static string GetFactionName(Faction faction, DataManager manager) {
+        public static string GetFactionName(string faction) {
             try {
-                return FactionDef.GetFactionDefByEnum(manager, faction).Name.Replace("the ", "").Replace("The ", "");
+                return FactionEnumeration.GetFactionByName(faction).FactionDef.Name.Replace("the ", "").Replace("The ", "");
             }
             catch (Exception ex) {
                 PersistentMapClient.Logger.LogError(ex);
@@ -252,31 +242,31 @@ namespace PersistentMapClient {
             }
         }
 
-        public static List<Faction> GetEmployees(StarSystem system, SimGameState Sim) {
+        public static List<FactionValue> GetEmployees(StarSystem system, SimGameState Sim) {
             try {
-                List<Faction> employees = new List<Faction>();
+                List<FactionValue> employees = new List<FactionValue>();
                 if (Sim.Starmap != null) {
                     // If a faction owns the planet, add the owning faction and local government
-                    if (system.Owner != Faction.NoFaction) {
-                        employees.Add(Faction.Locals);
-                        if (system.Owner != Faction.Locals) {
-                            employees.Add(system.Owner);
+                    if (system.OwnerValue != FactionEnumeration.GetNoFactionValue()) {
+                        employees.Add(FactionEnumeration.GetFactionByName("Locals"));
+                        if (system.OwnerValue != FactionEnumeration.GetFactionByName("Locals")) {
+                            employees.Add(system.OwnerValue);
                         }
                     }
 
                     // Look across neighboring systems, and add employees of factions that border this system
-                    List<Faction> distinctNeighbors = Sim.Starmap.GetAvailableNeighborSystem(system)
-                        .Select(s => s.Owner)
-                        .Where(f => f != Faction.NoFaction && f != system.Owner && f != Faction.Locals)
+                    List<FactionValue> distinctNeighbors = Sim.Starmap.GetAvailableNeighborSystem(system)
+                        .Select(s => s.OwnerValue)
+                        .Where(f => f != FactionEnumeration.GetNoFactionValue() && f != system.OwnerValue && f != FactionEnumeration.GetFactionByName("Locals"))
                         .Distinct()
                         .ToList();
                     employees.AddRange(distinctNeighbors);
 
                     // If a capital is occupied, add the faction that originally owned the capital to the employer list
                     if (Helper.capitalsBySystemName.Contains(system.Name)) {
-                        Faction originalCapitalFaction = Helper.capitalsBySystemName[system.Name].First();
-                        if (!employees.Contains(originalCapitalFaction)) {
-                            employees.Add(originalCapitalFaction);
+                        string originalCapitalFaction = Helper.capitalsBySystemName[system.Name].First();
+                        if (!employees.Contains(FactionEnumeration.GetFactionByName(originalCapitalFaction))) {
+                            employees.Add(FactionEnumeration.GetFactionByName(originalCapitalFaction));
                         }
                     }
                 }
@@ -288,27 +278,27 @@ namespace PersistentMapClient {
             }
         }
 
-        public static List<Faction> GetTargets(StarSystem system, SimGameState Sim) {
+        public static List<FactionValue> GetTargets(StarSystem system, SimGameState Sim) {
             try {
-                List<Faction> targets = new List<Faction>();
+                List<FactionValue> targets = new List<FactionValue>();
                 if (Sim.Starmap != null) {
-                    targets.Add(Faction.AuriganPirates);
-                    if (system.Owner != Faction.NoFaction) {
-                        if (system.Owner != Faction.Locals) {
-                            targets.Add(system.Owner);
+                    targets.Add(FactionEnumeration.GetAuriganPiratesFactionValue());
+                    if (system.OwnerValue != FactionEnumeration.GetNoFactionValue()) {
+                        if (system.OwnerValue != FactionEnumeration.GetFactionByName("Locals")) {
+                            targets.Add(system.OwnerValue);
                         }
-                        targets.Add(Faction.Locals);
+                        targets.Add(FactionEnumeration.GetFactionByName("Locals"));
                     }
                     foreach (StarSystem neigbourSystem in Sim.Starmap.GetAvailableNeighborSystem(system)) {
-                        if (system.Owner != neigbourSystem.Owner && !targets.Contains(neigbourSystem.Owner) && neigbourSystem.Owner != Faction.NoFaction) {
-                            targets.Add(neigbourSystem.Owner);
+                        if (system.OwnerValue != neigbourSystem.OwnerValue && !targets.Contains(neigbourSystem.OwnerValue) && neigbourSystem.OwnerValue != FactionEnumeration.GetNoFactionValue()) {
+                            targets.Add(neigbourSystem.OwnerValue);
                         }
                     }
 
                 }
                 else {
-                    foreach (KeyValuePair<Faction, FactionDef> pair in Sim.FactionsDict) {
-                        targets.Add(pair.Key);
+                    foreach (FactionValue faction in FactionEnumeration.FactionList) {
+                        targets.Add(faction);
                     }
                 }
                 return targets;
@@ -320,58 +310,59 @@ namespace PersistentMapClient {
         }
 
         // Capitals by faction
-        private static Dictionary<Faction, string> capitalsByFaction = new Dictionary<Faction, string> {
-            { Faction.Kurita, "Luthien" },
-            { Faction.Davion, "New Avalon" },
-            { Faction.Liao, "Sian" },
-            { Faction.Marik, "Atreus (FWL)" },
-            { Faction.Rasalhague, "Rasalhague" },
-            { Faction.Ives, "St. Ives" },
-            { Faction.Oberon, "Oberon" },
-            { Faction.TaurianConcordat, "Taurus" },
-            { Faction.MagistracyOfCanopus, "Canopus" },
-            { Faction.Outworld, "Alpheratz" },
-            { Faction.Circinus, "Circinus" },
-            { Faction.Marian, "Alphard (MH)" },
-            { Faction.Lothian, "Lothario" },
-            { Faction.AuriganRestoration, "Coromodir" },
-            { Faction.Steiner, "Tharkad" },
-            { Faction.ComStar, "Terra" },
-            { Faction.Castile, "Asturias" },
-            { Faction.Chainelane, "Far Reach" },
-            { Faction.ClanBurrock, "Albion (Clan)" },
-            { Faction.ClanCloudCobra, "Zara (Homer 2850+)" },
-            { Faction.ClanCoyote, "Tamaron" },
-            { Faction.ClanDiamondShark, "Strato Domingo" },
-            { Faction.ClanFireMandrill, "Shadow" },
-            { Faction.ClanGhostBear, "Arcadia (Clan)" },
-            { Faction.ClanGoliathScorpion, "Dagda (Clan)" },
-            { Faction.ClanHellsHorses, "Kirin" },
-            { Faction.ClanIceHellion, "Hector" },
-            { Faction.ClanJadeFalcon, "Ironhold" },
-            { Faction.ClanNovaCat, "Barcella" },
-            { Faction.ClansGeneric, "Strana Mechty" },
-            { Faction.ClanSmokeJaguar, "Huntress" },
-            { Faction.ClanSnowRaven, "Lum" },
-            { Faction.ClanStarAdder, "Sheridan (Clan)" },
-            { Faction.ClanSteelViper, "New Kent" },
-            { Faction.ClanWolf, "Tiber (Clan)" },
-            { Faction.Delphi, "New Delphi" },
-            { Faction.Elysia, "Blackbone (Nyserta 3025+)" },
-            { Faction.Hanse, "Bremen (HL)" },
-            { Faction.JarnFolk, "Trondheim (JF)" },
-            { Faction.Tortuga, "Tortuga Prime" },
-            { Faction.Valkyrate, "Gotterdammerung" },
-            { Faction.Axumite, "Thala" }
-            //,{ Faction.WordOfBlake, "Hope (Randis 2988+)" }
+        private static Dictionary<string, string> capitalsByFaction = new Dictionary<string, string> {
+            { "Kurita", "Luthien" },
+            { "Davion", "New Avalon" },
+            { "Liao", "Sian" },
+            { "Marik", "Atreus (FWL)" },
+            { "Rasalhague", "Rasalhague" },
+            { "Ives", "St. Ives" },
+            { "Oberon", "Oberon" },
+            { "TaurianConcordat", "Taurus" },
+            { "MagistracyOfCanopus", "Canopus" },
+            { "Outworld", "Alpheratz" },
+            { "Circinus", "Circinus" },
+            { "Marian", "Alphard (MH)" },
+            { "Lothian", "Lothario" },
+            { "AuriganRestoration", "Coromodir" },
+            { "Steiner", "Tharkad" },
+            { "ComStar", "Terra" },
+            { "Castile", "Asturias" },
+            { "Chainelane", "Far Reach" },
+            { "ClanBurrock", "Albion (Clan)" },
+            { "ClanCloudCobra", "Zara (Homer 2850+)" },
+            { "ClanCoyote", "Tamaron" },
+            { "ClanDiamondShark", "Strato Domingo" },
+            { "ClanFireMandrill", "Shadow" },
+            { "ClanGhostBear", "Arcadia (Clan)" },
+            { "ClanGoliathScorpion", "Dagda (Clan)" },
+            { "ClanHellsHorses", "Kirin" },
+            { "ClanIceHellion", "Hector" },
+            { "ClanJadeFalcon", "Ironhold" },
+            { "ClanNovaCat", "Barcella" },
+            { "ClansGeneric", "Strana Mechty" },
+            { "ClanSmokeJaguar", "Huntress" },
+            { "ClanSnowRaven", "Lum" },
+            { "ClanStarAdder", "Sheridan (Clan)" },
+            { "ClanSteelViper", "New Kent" },
+            { "ClanWolf", "Tiber (Clan)" },
+            { "Delphi", "New Delphi" },
+            { "Elysia", "Blackbone (Nyserta 3025+)" },
+            { "Hanse", "Bremen (HL)" },
+            { "JarnFolk", "Trondheim (JF)" },
+            { "Tortuga", "Tortuga Prime" },
+            { "Valkyrate", "Gotterdammerung" },
+            { "Axumite", "Thala" },
+            { "WordOfBlake", "EC3040-B42A" },
+            {"Illyrian", "Illyria" }
         };
 
-        private static ILookup<string, Faction> capitalsBySystemName = capitalsByFaction.ToLookup(pair => pair.Value, pair => pair.Key);
-        public static bool IsCapital(StarSystem system, Faction faction) {
+        private static ILookup<string, string> capitalsBySystemName = capitalsByFaction.ToLookup(pair => pair.Value, pair => pair.Key);
+        public static bool IsCapital(StarSystem system, string faction) {
             bool isCapital = false;
             try {
                 if (capitalsBySystemName.Contains(system.Name)) {
-                    Faction systemFaction = capitalsBySystemName[system.Name].First();
+                    string systemFaction = capitalsBySystemName[system.Name].First();
                     isCapital = (systemFaction == faction);
                 }
             }
@@ -381,7 +372,7 @@ namespace PersistentMapClient {
             return isCapital;
         }
 
-        public static int CalculatePlanetSupport(SimGameState Sim, StarSystem attackSystem, Faction attacker, Faction defender) {
+        public static int CalculatePlanetSupport(SimGameState Sim, StarSystem attackSystem, FactionValue attacker, FactionValue defender) {
             int support = 0;
             PersistentMapClient.Logger.Log("Calculating planet support");
             List<StarSystem> neighbours = new List<StarSystem>();
@@ -390,16 +381,16 @@ namespace PersistentMapClient {
                     neighbours.Add(possibleSystem);
                 }
             }
-            if (attackSystem.Owner == attacker) {
-                if (IsCapital(attackSystem, attacker)) {
+            if (attackSystem.OwnerValue == attacker) {
+                if (IsCapital(attackSystem, attacker.Name)) {
                     support += 10;
                 }
                 else {
                     support++;
                 }
             }
-            else if (attackSystem.Owner == defender) {
-                if (IsCapital(attackSystem, defender)) {
+            else if (attackSystem.OwnerValue == defender) {
+                if (IsCapital(attackSystem, defender.Name)) {
                     support -= 10;
                 }
                 else {
@@ -408,16 +399,16 @@ namespace PersistentMapClient {
             }
 
             foreach (StarSystem neigbourSystem in neighbours) {
-                if (neigbourSystem.Owner == attacker) {
-                    if (IsCapital(neigbourSystem, attacker)) {
+                if (neigbourSystem.OwnerValue == attacker) {
+                    if (IsCapital(neigbourSystem, attacker.Name)) {
                         support += 10;
                     }
                     else {
                         support++;
                     }
                 }
-                else if (neigbourSystem.Owner == defender) {
-                    if (IsCapital(neigbourSystem, defender)) {
+                else if (neigbourSystem.OwnerValue == defender) {
+                    if (IsCapital(neigbourSystem, defender.Name)) {
                         support -= 10;
                     }
                     else {
@@ -484,7 +475,7 @@ namespace PersistentMapClient {
                 level = activeMaps.GetNext(false);
                 MapEncounterContractData = AccessTools.Method(typeof(SimGameState), "FillMapEncounterContractData").Invoke(Sim, new object[] { system, difficultyRange, potentialContracts, validParticipants, level });
             }
-            system.SetCurrentContractFactions(Faction.INVALID_UNSET, Faction.INVALID_UNSET);
+            system.SetCurrentContractFactions(FactionEnumeration.GetInvalidUnsetFactionValue(), FactionEnumeration.GetInvalidUnsetFactionValue());
             HashSet<int> Contracts = Traverse.Create(MapEncounterContractData).Field("Contracts").GetValue<HashSet<int>>();
 
             if (MapEncounterContractData == null || Contracts.Count == 0) {

@@ -41,7 +41,7 @@ namespace PersistentMapClient {
             new KeyValuePair<Faction, List<ShopDefItem>>(Faction.INVALID_UNSET, new List<ShopDefItem>());
         public static KeyValuePair<Faction, List<string>> currentShopBought =
             new KeyValuePair<Faction, List<string>>(Faction.INVALID_UNSET, new List<string>());
-        public static Dictionary<Faction, DateTime> LastUpdate = new Dictionary<Faction, DateTime>();
+        public static Dictionary<string, DateTime> LastUpdate = new Dictionary<string, DateTime>();
         public static int UpdateTimer = 15;
 
 
