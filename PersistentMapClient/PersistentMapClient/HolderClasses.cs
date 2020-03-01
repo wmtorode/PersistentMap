@@ -31,9 +31,9 @@ namespace PersistentMapClient {
         public static bool warmission = false;
         public static string ShopFileTag = "rt_economy";
 
-        public static List<Faction> excludedFactions = new List<Faction>() { Faction.AuriganMercenaries, Faction.Betrayers, Faction.MagistracyCentrella,
-            Faction.MajestyMetals, Faction.MercenaryReviewBoard, Faction.Nautilus, Faction.NoFaction, Faction.FlakJackals, Faction.LocalsBrockwayRefugees,
-            Faction.SelfEmployed, Faction.MasonsMarauders, Faction.SteelBeast, Faction.KellHounds, Faction.RazorbackMercs, Faction.HostileMercenaries };
+        public static List<string> excludedFactions = new List<string>() { "AuriganMercenaries", "Betrayers", "MagistracyCentrella",
+            "MajestyMetals", "MercenaryReviewBoard", "Nautilus", "NoFaction", "FlakJackals", "LocalsBrockwayRefugees",
+            "SelfEmployed", "MasonsMarauders", "SteelBeast", "KellHounds", "RazorbackMercs", "HostileMercenaries" };
         public static PersistentMapAPI.StarMap currentMap;
 
         public static Dictionary<Faction, List<ShopDefItem>> currentShops = new Dictionary<Faction, List<ShopDefItem>>();
@@ -47,9 +47,9 @@ namespace PersistentMapClient {
 
         //prioFields
         public static bool prioGen = false;
-        public static Faction prioEmployer = Faction.INVALID_UNSET;
-        public static Faction prioTarget = Faction.INVALID_UNSET;
-        public static Faction prioThird = Faction.INVALID_UNSET;
+        public static FactionValue prioEmployer = FactionEnumeration.GetInvalidUnsetFactionValue();
+        public static FactionValue prioTarget = FactionEnumeration.GetInvalidUnsetFactionValue();
+        public static FactionValue prioThird = FactionEnumeration.GetInvalidUnsetFactionValue();
 
         public struct PotentialContract {
             public ContractOverride contractOverride;

@@ -434,7 +434,7 @@ namespace PersistentMapClient {
             ContractType.ThreeWayBattle
         };
 
-        public static Contract GetNewWarContract(SimGameState Sim, int Difficulty, Faction emp, Faction targ, Faction third, StarSystem system) {
+        public static Contract GetNewWarContract(SimGameState Sim, int Difficulty, FactionValue emp, FactionValue targ, FactionValue third, StarSystem system) {
             Fields.prioGen = true;
             Fields.prioEmployer = emp;
             Fields.prioTarget = targ;

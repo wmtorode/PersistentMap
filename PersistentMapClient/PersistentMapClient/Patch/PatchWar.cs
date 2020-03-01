@@ -428,18 +428,18 @@ namespace PersistentMapClient {
                     __instance.Sim.GlobalContracts.Add(__instance.Sim.ActiveTravelContract);
                 }
 
-                foreach (KeyValuePair<Faction, FactionDef> pair in __instance.Sim.FactionsDict) {
-                    if (!Fields.excludedFactions.Contains(pair.Key)) {
+                foreach (FactionValue faction in FactionEnumeration.FactionList) {
+                    if (!Fields.excludedFactions.Contains(faction.Name)) {
                         int numberOfContracts = 0;
-                        if (__instance.Sim.IsFactionAlly(pair.Key, null)) {
+                        if (__instance.Sim.IsFactionAlly(faction, null)) {
                             numberOfContracts = Fields.settings.priorityContractsPerAlly;
                         }
                         if (numberOfContracts > 0) {
                             List<PersistentMapAPI.System> targets = new List<PersistentMapAPI.System>();
                             if (Fields.currentMap != null) {
                                 foreach (PersistentMapAPI.System potentialTarget in Fields.currentMap.starsystems) {
-                                    FactionControl control = potentialTarget.controlList.FirstOrDefault(x => x.faction == pair.Key);
-                                    if (control != null && control.percentage < 100 && control.percentage != 0) {
+                                    FactionControl control = potentialTarget.factions.FirstOrDefault(x => x.Name == faction.Name);
+                                    if (control != null && control.control < 100 && control.control != 0) {
                                         targets.Add(potentialTarget);
                                     }
                                 }
@@ -449,27 +449,27 @@ namespace PersistentMapClient {
                                     for (int i = 0; i < numberOfContracts; i++) {
                                         StarSystem realSystem = __instance.Sim.StarSystems.FirstOrDefault(x => x.Name.Equals(targets[i].name));
                                         if (realSystem != null) {
-                                            Faction target = realSystem.Owner;
-                                            if (pair.Key == target || Fields.excludedFactions.Contains(target)) {
-                                                List<FactionControl> ownerlist = targets[i].controlList.OrderByDescending(x => x.percentage).ToList();
+                                            FactionValue target = realSystem.OwnerValue;
+                                            if (faction == target || Fields.excludedFactions.Contains(target.Name)) {
+                                                List<FactionControl> ownerlist = targets[i].factions.OrderByDescending(x => x.control).ToList();
                                                 if (ownerlist.Count > 1) {
-                                                    target = ownerlist[1].faction;
-                                                    if (Fields.excludedFactions.Contains(target)) {
-                                                        target = Faction.AuriganPirates;
+                                                    target = FactionEnumeration.GetFactionByName(ownerlist[1].Name);
+                                                    if (Fields.excludedFactions.Contains(target.Name)) {
+                                                        target = FactionEnumeration.GetAuriganPiratesFactionValue();
                                                     }
                                                 }
                                                 else {
-                                                    target = Faction.AuriganPirates;
+                                                    target = FactionEnumeration.GetAuriganPiratesFactionValue();
                                                 }
                                             }
-                                            Faction possibleThird = Faction.AuriganPirates;
-                                            foreach (FactionControl control in targets[i].controlList.OrderByDescending(x => x.percentage)) {
-                                                if (control.faction != pair.Key && control.faction != target) {
-                                                    possibleThird = control.faction;
+                                            FactionValue possibleThird = FactionEnumeration.GetAuriganPiratesFactionValue();
+                                            foreach (FactionControl control in targets[i].factions.OrderByDescending(x => x.control)) {
+                                                if (control.Name != faction.Name && control.Name != target.Name) {
+                                                    possibleThird = FactionEnumeration.GetFactionByName(control.Name);
                                                     break;
                                                 }
                                             }
-                                            Contract contract = Helper.GetNewWarContract(__instance.Sim, realSystem.Def.GetDifficulty(__instance.Sim.SimGameMode), pair.Key, target, possibleThird, realSystem);
+                                            Contract contract = Helper.GetNewWarContract(__instance.Sim, realSystem.Def.GetDifficulty(__instance.Sim.SimGameMode), faction, target, possibleThird, realSystem);
                                             if (contract != null) {
                                                 contract.Override.contractDisplayStyle = ContractDisplayStyle.BaseCampaignStory;
                                                 contract.SetInitialReward(Mathf.RoundToInt(contract.InitialContractValue * Fields.settings.priorityContactPayPercentage));
