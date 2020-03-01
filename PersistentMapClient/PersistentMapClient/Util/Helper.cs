@@ -242,15 +242,15 @@ namespace PersistentMapClient {
             }
         }
 
-        public static List<FactionValue> GetEmployees(StarSystem system, SimGameState Sim) {
+        public static List<string> GetEmployees(StarSystem system, SimGameState Sim) {
             try {
-                List<FactionValue> employees = new List<FactionValue>();
+                List<string> employees = new List<string>();
                 if (Sim.Starmap != null) {
                     // If a faction owns the planet, add the owning faction and local government
                     if (system.OwnerValue != FactionEnumeration.GetNoFactionValue()) {
-                        employees.Add(FactionEnumeration.GetFactionByName("Locals"));
+                        employees.Add(FactionEnumeration.GetFactionByName("Locals").Name);
                         if (system.OwnerValue != FactionEnumeration.GetFactionByName("Locals")) {
-                            employees.Add(system.OwnerValue);
+                            employees.Add(system.OwnerValue.Name);
                         }
                     }
 
@@ -260,13 +260,16 @@ namespace PersistentMapClient {
                         .Where(f => f != FactionEnumeration.GetNoFactionValue() && f != system.OwnerValue && f != FactionEnumeration.GetFactionByName("Locals"))
                         .Distinct()
                         .ToList();
-                    employees.AddRange(distinctNeighbors);
+                    foreach (FactionValue neighbour in distinctNeighbors)
+                        {
+                        employees.Add(neighbour.Name);
+                        }
 
                     // If a capital is occupied, add the faction that originally owned the capital to the employer list
                     if (Helper.capitalsBySystemName.Contains(system.Name)) {
                         string originalCapitalFaction = Helper.capitalsBySystemName[system.Name].First();
-                        if (!employees.Contains(FactionEnumeration.GetFactionByName(originalCapitalFaction))) {
-                            employees.Add(FactionEnumeration.GetFactionByName(originalCapitalFaction));
+                        if (!employees.Contains(FactionEnumeration.GetFactionByName(originalCapitalFaction).Name)) {
+                            employees.Add(FactionEnumeration.GetFactionByName(originalCapitalFaction).Name);
                         }
                     }
                 }
@@ -278,27 +281,27 @@ namespace PersistentMapClient {
             }
         }
 
-        public static List<FactionValue> GetTargets(StarSystem system, SimGameState Sim) {
+        public static List<string> GetTargets(StarSystem system, SimGameState Sim) {
             try {
-                List<FactionValue> targets = new List<FactionValue>();
+                List<string> targets = new List<string>();
                 if (Sim.Starmap != null) {
-                    targets.Add(FactionEnumeration.GetAuriganPiratesFactionValue());
+                    targets.Add(FactionEnumeration.GetAuriganPiratesFactionValue().Name);
                     if (system.OwnerValue != FactionEnumeration.GetNoFactionValue()) {
                         if (system.OwnerValue != FactionEnumeration.GetFactionByName("Locals")) {
-                            targets.Add(system.OwnerValue);
+                            targets.Add(system.OwnerValue.Name);
                         }
-                        targets.Add(FactionEnumeration.GetFactionByName("Locals"));
+                        targets.Add(FactionEnumeration.GetFactionByName("Locals").Name);
                     }
                     foreach (StarSystem neigbourSystem in Sim.Starmap.GetAvailableNeighborSystem(system)) {
-                        if (system.OwnerValue != neigbourSystem.OwnerValue && !targets.Contains(neigbourSystem.OwnerValue) && neigbourSystem.OwnerValue != FactionEnumeration.GetNoFactionValue()) {
-                            targets.Add(neigbourSystem.OwnerValue);
+                        if (system.OwnerValue != neigbourSystem.OwnerValue && !targets.Contains(neigbourSystem.OwnerValue.Name) && neigbourSystem.OwnerValue != FactionEnumeration.GetNoFactionValue()) {
+                            targets.Add(neigbourSystem.OwnerValue.Name);
                         }
                     }
 
                 }
                 else {
                     foreach (FactionValue faction in FactionEnumeration.FactionList) {
-                        targets.Add(faction);
+                        targets.Add(faction.Name);
                     }
                 }
                 return targets;

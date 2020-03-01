@@ -260,17 +260,17 @@ namespace PersistentMapClient {
     [HarmonyPatch(typeof(Starmap), "PopulateMap", new Type[] { typeof(SimGameState) })]
     public static class Starmap_PopulateMap_Patch {
        
-        private static MethodInfo methodSetOwner = AccessTools.Method(typeof(StarSystemDef), "set_Owner");
-        private static MethodInfo methodSetContractEmployers = AccessTools.Method(typeof(StarSystemDef), "set_ContractEmployers");
-        private static MethodInfo methodSetContractTargets = AccessTools.Method(typeof(StarSystemDef), "set_ContractTargets");
+        private static MethodInfo methodSetOwner = AccessTools.Method(typeof(StarSystemDef), "set_OwnerValue");
+        private static FieldInfo fieldSetContractEmployers = AccessTools.Field(typeof(StarSystemDef), "contractEmployerIDs");
+        private static FieldInfo fieldSetContractTargets = AccessTools.Field(typeof(StarSystemDef), "contractTargetIDs");
         private static MethodInfo methodSetDescription = AccessTools.Method(typeof(StarSystemDef), "set_Description");
         private static FieldInfo fieldSimGameInterruptManager = AccessTools.Field(typeof(SimGameState), "interruptQueue");
 
         static void Postfix(Starmap __instance, SimGameState simGame) {
             try {
                 PersistentMapClient.Logger.LogIfDebug($"methodSetOwner is:({methodSetOwner})");
-                PersistentMapClient.Logger.LogIfDebug($"methodSetContractEmployers is:({methodSetContractEmployers})");
-                PersistentMapClient.Logger.LogIfDebug($"methodSetContractTargets is:({methodSetContractTargets})");
+                PersistentMapClient.Logger.LogIfDebug($"fieldSetContractEmployers is:({fieldSetContractEmployers})");
+                PersistentMapClient.Logger.LogIfDebug($"fieldSetContractTargets is:({fieldSetContractTargets})");
                 PersistentMapClient.Logger.LogIfDebug($"methodSetDescription is:({methodSetDescription})");
                 PersistentMapClient.Logger.LogIfDebug($"fieldSimGameInterruptManager is:({fieldSimGameInterruptManager})");
                 Fields.currentMap = Web.GetStarMap();
@@ -306,8 +306,8 @@ namespace PersistentMapClient {
                         system2 = Helper.ChangeWarDescription(system2, simGame, system);
 
                         // Update the contracts on the system
-                        methodSetContractEmployers.Invoke(system2.Def, new object[] { Helper.GetEmployees(system2, simGame) });
-                        methodSetContractTargets.Invoke(system2.Def, new object[] { Helper.GetTargets(system2, simGame) });
+                        fieldSetContractEmployers.SetValue(system2.Def, Helper.GetEmployees(system2, simGame) );
+                        fieldSetContractTargets.SetValue(system2.Def, Helper.GetTargets(system2, simGame));
 
                         // If the system is next to enemy factions, update the map to show the border
                         if (Helper.IsBorder(system2, simGame) && simGame.Starmap != null) {
@@ -331,8 +331,8 @@ namespace PersistentMapClient {
 
                 // For each system neighboring a system whose ownership changed, update their contracts as well
                 foreach (StarSystem changedSystem in transitiveContractUpdateTargets) {
-                    methodSetContractEmployers.Invoke(changedSystem.Def, new object[] { Helper.GetEmployees(changedSystem, simGame) });
-                    methodSetContractTargets.Invoke(changedSystem.Def, new object[] { Helper.GetTargets(changedSystem, simGame) });
+                    fieldSetContractEmployers.SetValue(changedSystem.Def, Helper.GetEmployees(changedSystem, simGame));
+                    fieldSetContractTargets.SetValue(changedSystem.Def, Helper.GetTargets(changedSystem, simGame));
 
                     // Update the description on these systems to show the new contract options
                     PersistentMapAPI.System system = Fields.currentMap.starsystems.FirstOrDefault(x => x.name.Equals(changedSystem.Name));
@@ -372,7 +372,7 @@ namespace PersistentMapClient {
             try {
                 if (!__instance.IsFlashpointContract) {
                     GameInstance game = LazySingletonBehavior<UnityGameInstance>.Instance.Game;
-                    if (game.Simulation.IsFactionAlly(__instance.Override.employerTeam.faction)) {
+                    if (game.Simulation.IsFactionAlly(__instance.Override.employerTeam.FactionValue)) {
                         if (Fields.cheater) {
                             PersistentMapClient.Logger.Log("cheated save, skipping war upload");
                             return;
@@ -387,15 +387,15 @@ namespace PersistentMapClient {
                         StarSystem system = game.Simulation.StarSystems.Find(x => x.ID == __instance.TargetSystem);
                         foreach (StarSystem potential in game.Simulation.StarSystems) {
                             if (Helper.IsCapital(system, __instance.Override.employerTeam.faction) || (!potential.Name.Equals(system.Name) &&
-                                potential.Owner == __instance.Override.employerTeam.faction &&
+                                potential.OwnerValue == __instance.Override.employerTeam.FactionValue &&
                                 Helper.GetDistanceInLY(potential.Position.x, potential.Position.y, system.Position.x, system.Position.y) <= game.Simulation.Constants.Travel.MaxJumpDistance)) {
-                                int planetSupport = Helper.CalculatePlanetSupport(game.Simulation, system, __instance.Override.employerTeam.faction, __instance.Override.targetTeam.faction);
+                                int planetSupport = Helper.CalculatePlanetSupport(game.Simulation, system, __instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue);
                                 float num8 = (float)__instance.GetNegotiableReputationBaseValue(game.Simulation.Constants) * __instance.PercentageContractReputation;
                                 float num9 = Convert.ToSingle(__instance.GameContext.GetObject(GameContextObjectTagEnum.ContractBonusEmployerReputation));
                                 float num10 = (float)__instance.GetBaseReputationValue(game.Simulation.Constants);
                                 float num11 = num8 + num9 + num10;
                                 int repchange = Mathf.RoundToInt(num11);
-                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.faction, __instance.Override.targetTeam.faction, result, system.Name, __instance.Difficulty, repchange, planetSupport);
+                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, system.Name, __instance.Difficulty, repchange, planetSupport);
                                 bool postSuccessfull = Web.PostMissionResult(mresult, game.Simulation.Player1sMercUnitHeraldryDef.Description.Name);
                                 if (!postSuccessfull) {
                                     SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(game.Simulation);
@@ -497,14 +497,14 @@ namespace PersistentMapClient {
 
     [HarmonyPatch(typeof(SimGameState), "CreateTravelContract")]
     public static class SimGameState_CreateTravelContract_Patch {
-        static void Prefix(ref Faction employer, ref Faction target, ref Faction targetsAlly, ref Faction employersAlly, ref Faction neutralToAll, ref Faction hostileToAll) {
+        static void Prefix(ref FactionValue employer, ref FactionValue target, ref FactionValue targetsAlly, ref FactionValue employersAlly, ref FactionValue neutralToAll, ref FactionValue hostileToAll) {
             try {
                 if (Fields.prioGen) {
                     employer = Fields.prioEmployer;
                     employersAlly = Fields.prioEmployer;
                     target = Fields.prioTarget;
                     targetsAlly = Fields.prioTarget;
-                    if(hostileToAll != Faction.INVALID_UNSET) {
+                    if(hostileToAll != FactionEnumeration.GetInvalidUnsetFactionValue()) {
                         hostileToAll = Fields.prioThird;
                     }
                 }
@@ -517,14 +517,14 @@ namespace PersistentMapClient {
 
     [HarmonyPatch(typeof(SimGameState), "PrepContract")]
     public static class SimGameState_PrepContract_Patch {
-        static void Prefix(ref Faction employer, ref Faction employersAlly, ref Faction target, ref Faction targetsAlly, ref Faction NeutralToAll, ref Faction HostileToAll) {
+        static void Prefix(ref FactionValue employer, ref FactionValue employersAlly, ref FactionValue target, ref FactionValue targetsAlly, ref FactionValue NeutralToAll, ref FactionValue HostileToAll) {
             try {
                 if (Fields.prioGen) {
                     employer = Fields.prioEmployer;
                     employersAlly = Fields.prioEmployer;
                     target = Fields.prioTarget;
                     targetsAlly = Fields.prioTarget;
-                    if (HostileToAll != Faction.INVALID_UNSET) {
+                    if (HostileToAll != FactionEnumeration.GetInvalidUnsetFactionValue()) {
                         HostileToAll = Fields.prioThird;
                     }
                 }
