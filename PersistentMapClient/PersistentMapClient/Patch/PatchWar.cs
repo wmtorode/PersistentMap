@@ -236,7 +236,7 @@ namespace PersistentMapClient {
                 GameObject companyObject = GameObject.Find("COMPANYNAMES");
                 if (companyObject != null && Fields.currentMap != null) {
                     TextMeshProUGUI companietext = companyObject.transform.FindRecursive("txt-owner").GetComponent<TextMeshProUGUI>();
-                    PersistentMapAPI.System system = Fields.currentMap.systems.FirstOrDefault(x => x.name.Equals(___starSystem.Name));
+                    PersistentMapAPI.System system = Fields.currentMap.starsystems.FirstOrDefault(x => x.name.Equals(___starSystem.Name));
                     //if (system != null && companietext != null) {
                     //    List<string> companyNames = new List<string>();
                     //    foreach (Company company in system.companies) {
@@ -284,11 +284,11 @@ namespace PersistentMapClient {
                 List<string> changeNotifications = new List<string>();
                 List<StarSystem> transitiveContractUpdateTargets = new List<StarSystem>();
 
-                foreach (PersistentMapAPI.System system in Fields.currentMap.systems) {
+                foreach (PersistentMapAPI.System system in Fields.currentMap.starsystems) {
                     if (system == null) {
                         PersistentMapClient.Logger.Log("System in map null");
                     }
-                    if (system.activePlayers > 0) {
+                    if (system.Players > 0) {
                        AddActivePlayersBadgeToSystem(system);
                     }
 
@@ -297,8 +297,8 @@ namespace PersistentMapClient {
                         if (system2.Tags == null) {
                             PersistentMapClient.Logger.Log(system2.Name + ": Has no Tags");
                         }
-                        FactionValue newOwner = system.controlList.OrderByDescending(x => x.percentage).First().faction;
-                        FactionValue oldOwner = system2.Owner;
+                        FactionValue newOwner = FactionEnumeration.GetFactionByName(system.owner);
+                        FactionValue oldOwner = system2.OwnerValue;
                         // Update control to the new faction
                         methodSetOwner.Invoke(system2.Def, new object[] { newOwner });
                         system2.Tags.Remove(Helper.GetFactionTag(oldOwner));
@@ -335,7 +335,7 @@ namespace PersistentMapClient {
                     methodSetContractTargets.Invoke(changedSystem.Def, new object[] { Helper.GetTargets(changedSystem, simGame) });
 
                     // Update the description on these systems to show the new contract options
-                    PersistentMapAPI.System system = Fields.currentMap.systems.FirstOrDefault(x => x.name.Equals(changedSystem.Name));
+                    PersistentMapAPI.System system = Fields.currentMap.starsystems.FirstOrDefault(x => x.name.Equals(changedSystem.Name));
                     if (system != null) {
                         methodSetDescription.Invoke(changedSystem.Def,
                             new object[] { Helper.ChangeWarDescription(changedSystem, simGame, system).Def.Description });
@@ -437,7 +437,7 @@ namespace PersistentMapClient {
                         if (numberOfContracts > 0) {
                             List<PersistentMapAPI.System> targets = new List<PersistentMapAPI.System>();
                             if (Fields.currentMap != null) {
-                                foreach (PersistentMapAPI.System potentialTarget in Fields.currentMap.systems) {
+                                foreach (PersistentMapAPI.System potentialTarget in Fields.currentMap.starsystems) {
                                     FactionControl control = potentialTarget.controlList.FirstOrDefault(x => x.faction == pair.Key);
                                     if (control != null && control.percentage < 100 && control.percentage != 0) {
                                         targets.Add(potentialTarget);

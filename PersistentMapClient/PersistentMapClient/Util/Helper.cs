@@ -150,9 +150,9 @@ namespace PersistentMapClient {
             }
         }
 
-        public static string GetFactionTag(Faction faction) {
+        public static string GetFactionTag(FactionValue faction) {
             try {
-                return "planet_faction_" + faction.ToString().ToLower();
+                return "planet_faction_" + faction.Name.ToLower();
             }
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);
