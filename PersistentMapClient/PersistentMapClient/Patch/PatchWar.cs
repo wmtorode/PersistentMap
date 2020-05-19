@@ -17,6 +17,16 @@ using UnityEngine.UI;
 
 namespace PersistentMapClient {
 
+
+    [HarmonyPatch(typeof(SimGameState), "InitCompanyStats")]
+    class SimGameState_InitCompanyStatsPatch
+    {
+        public static void Postfix(SimGameState __instance)
+        {
+            PersistentMapClient.setCompanyStats(__instance.CompanyStats);
+        }
+    }
+
     [HarmonyBefore(new string[] { "de.morphyum.MercDeployments" })]
     [HarmonyPatch(typeof(SimGameState), "Rehydrate")]
     public static class SimGameState_Rehydrate_Patch {
@@ -46,7 +56,7 @@ namespace PersistentMapClient {
     CompanyTagsChangedAction = 'BtSaveEdit.CompanyTagsChanged'
     StarSystemWarpAction = 'BtSaveEdit.ChangedCurrentStarSystem'*/
                 List<string> saveedits = new List<string>() { "BtSaveEdit.FundsAdded", "BtSaveEdit.InventoryAdded", "BtSaveEdit.ReputationChanged",
-                    "BtSaveEdit.MechsAdded" };
+                    "BtSaveEdit.MechsAdded", "BtSaveEdit.DebugStatsAccessed" };
                 foreach (string cheat in saveedits) {
                     if (__instance.CompanyStats.ContainsStatistic(cheat)) {
                         Fields.cheater = true;
@@ -55,6 +65,7 @@ namespace PersistentMapClient {
                         break;
                     }
                 }
+                PersistentMapClient.setCompanyStats(__instance.CompanyStats);
             }
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);
@@ -395,7 +406,7 @@ namespace PersistentMapClient {
                                 float num10 = (float)__instance.GetBaseReputationValue(game.Simulation.Constants);
                                 float num11 = num8 + num9 + num10;
                                 int repchange = Mathf.RoundToInt(num11);
-                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, system.Name, __instance.Difficulty, repchange, planetSupport, __instance.ContractTypeValue.Name);
+                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name);
                                 bool postSuccessfull = Web.PostMissionResult(mresult, game.Simulation.Player1sMercUnitHeraldryDef.Description.Name);
                                 if (!postSuccessfull) {
                                     SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(game.Simulation);

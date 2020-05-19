@@ -200,7 +200,7 @@ namespace PersistentMapClient {
                         _requestMethod = "POST";
                         break;
                     case WarService.PostMissionResult:
-                        _requestUrl = $"{Fields.settings.ServerURL}warServices/Mission/?CompanyName={_companyName}";
+                        _requestUrl = $"{Fields.settings.ServerURL}api/roguewarservices/postmissionresult";
                         _requestMethod = "POST";
                         break;
                     case WarService.PostSalvage:
@@ -236,7 +236,7 @@ namespace PersistentMapClient {
                 }
 
                 if (Fields.settings.ClientID != null) {
-                    request.Headers.Add("X-RT-MAP-CLIENT_ID", Fields.settings.ClientID);
+                    request.Headers.Add("X-RT-CLIENT", PersistentMapClient.getClientPostId());
                 }
 
                 return request;

@@ -2,13 +2,20 @@
 using Newtonsoft.Json;
 using System;
 using System.Reflection;
+using BattleTech;
 
 namespace PersistentMapClient {
 
     public class PersistentMapClient {
 
+        public static readonly string CLIENT_ID_STAT = "Pm_ClientId";
+        public static readonly string CAREER_ID_STAT = "Pm_CareerId";
+        public static readonly string MISSION_COUNT_STAT = "Pm_SuccessfulPostCount";
+        public static readonly string SEASON_STAT = "Pm_PlaySeasonNumber";
+
         internal static Logger Logger;
         internal static string ModDirectory;
+        internal static StatCollection companyStats;
 
         public static void Init(string directory, string settingsJSON) {
             ModDirectory = directory;
@@ -50,6 +57,45 @@ namespace PersistentMapClient {
         // Used for Unit Tests only
         public static void Dispose() {
             Logger.Close();
+        }
+
+        public static void setCompanyStats(StatCollection stats)
+        {
+            companyStats = stats;
+
+            if (!companyStats.ContainsStatistic(CLIENT_ID_STAT)) { companyStats.AddStatistic(CLIENT_ID_STAT, Fields.settings.ClientID); };
+            if (!companyStats.ContainsStatistic(CAREER_ID_STAT)) { companyStats.AddStatistic(SEASON_STAT, new Guid().ToString()); };
+            if (!companyStats.ContainsStatistic(SEASON_STAT)) { companyStats.AddStatistic(CLIENT_ID_STAT, Fields.settings.Season); };
+            if (!companyStats.ContainsStatistic(MISSION_COUNT_STAT)) { companyStats.AddStatistic(MISSION_COUNT_STAT, 0); };
+        }
+
+        public static string getClientPostId()
+        {
+            if (companyStats == null)
+            {
+                return "";
+            }
+            string clientPostId = $"{companyStats.GetValue<string>(CLIENT_ID_STAT)}{companyStats.GetValue<string>(CAREER_ID_STAT)}{companyStats.GetValue<string>(SEASON_STAT)}";
+            return clientPostId;
+        }
+
+        public static int getMissionCount()
+        {
+            if (companyStats == null)
+            {
+                return 0;
+            }
+            return companyStats.GetValue<int>(MISSION_COUNT_STAT);
+        }
+
+        public static void incrementMissionCount()
+        {
+            if (companyStats != null)
+            {
+                int currentValue = companyStats.GetValue<int>(MISSION_COUNT_STAT);
+                currentValue++;
+                companyStats.Set<int>(MISSION_COUNT_STAT, currentValue);
+            }
         }
     }
 }
