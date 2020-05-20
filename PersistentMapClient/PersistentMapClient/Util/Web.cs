@@ -152,6 +152,11 @@ namespace PersistentMapClient {
                 HttpWebResponse response = request.GetResponse() as HttpWebResponse;
                 watch.Stop();                
                 PersistentMapClient.Logger.LogIfDebug($"PostMissionResult took: {watch.ElapsedMilliseconds}ms.");
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    PersistentMapClient.Logger.Log($"PostMissionResult Failed Code: {response.StatusCode}");
+                    return false;
+                }
                 using (Stream responseStream = response.GetResponseStream()) {
                     StreamReader reader = new StreamReader(responseStream);
                     string mapstring = reader.ReadToEnd();
