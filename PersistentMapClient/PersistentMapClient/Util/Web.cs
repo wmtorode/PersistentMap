@@ -229,6 +229,8 @@ namespace PersistentMapClient {
                 request.Method = _requestMethod;
                 request.ContentType = "application/json; charset=utf-8";
                 request.Timeout = 30000; // 30s connection timeout
+                string clientId = PersistentMapClient.getClientPostId();
+                request.Headers["X-RT-CLIENT"] =  clientId;
 
                 if (_postJSON != null) {
                     // TODO: Why are we ASCII encoding instead of UTF-8?
@@ -240,9 +242,7 @@ namespace PersistentMapClient {
                     dataStream.Close();
                 }
 
-                if (Fields.settings.ClientID != null) {
-                    request.Headers.Add("X-RT-CLIENT", PersistentMapClient.getClientPostId());
-                }
+                
 
                 return request;
             }

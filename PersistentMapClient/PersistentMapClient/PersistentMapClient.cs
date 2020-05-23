@@ -63,9 +63,14 @@ namespace PersistentMapClient {
         {
             companyStats = stats;
 
+
             if (!companyStats.ContainsStatistic(CLIENT_ID_STAT)) { companyStats.AddStatistic(CLIENT_ID_STAT, Fields.settings.ClientID); };
-            if (!companyStats.ContainsStatistic(CAREER_ID_STAT)) { companyStats.AddStatistic(SEASON_STAT, new Guid().ToString()); };
-            if (!companyStats.ContainsStatistic(SEASON_STAT)) { companyStats.AddStatistic(CLIENT_ID_STAT, Fields.settings.Season); };
+            if (!companyStats.ContainsStatistic(CAREER_ID_STAT)) 
+            {
+                Guid careerId = Guid.NewGuid();
+                companyStats.AddStatistic(CAREER_ID_STAT, careerId.ToString()); 
+            }
+            if (!companyStats.ContainsStatistic(SEASON_STAT)) { companyStats.AddStatistic(SEASON_STAT, Fields.settings.Season); };
             if (!companyStats.ContainsStatistic(MISSION_COUNT_STAT)) { companyStats.AddStatistic(MISSION_COUNT_STAT, 0); };
         }
 
@@ -73,6 +78,7 @@ namespace PersistentMapClient {
         {
             if (companyStats == null)
             {
+                Logger.Log("null company Stats, cannot send data to server!");
                 return "";
             }
             string clientPostId = $"{companyStats.GetValue<string>(CLIENT_ID_STAT)}{companyStats.GetValue<string>(CAREER_ID_STAT)}{companyStats.GetValue<string>(SEASON_STAT)}";
