@@ -10,6 +10,8 @@ using System.Text;
 namespace PersistentMapClient {
     public static class Web {
 
+
+
         private enum WarService {
             GetFactionShop,
             GetStarMap,
@@ -144,7 +146,8 @@ namespace PersistentMapClient {
         }
 
         // Send the results of a mission to the server
-        public static bool PostMissionResult(PersistentMapAPI.MissionResult mresult, string companyName) {
+        public static bool PostMissionResult(PersistentMapAPI.MissionResult mresult, string companyName, out string errorText) {
+            errorText = "No Error";
             try {
                 string testjson = JsonConvert.SerializeObject(mresult);           
                 HttpWebRequest request = new RequestBuilder(WarService.PostMissionResult).CompanyName(companyName).PostData(testjson).Build();
@@ -155,6 +158,7 @@ namespace PersistentMapClient {
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     PersistentMapClient.Logger.Log($"PostMissionResult Failed Code: {response.StatusCode}");
+                    errorText = "Unknown Error";
                     return false;
                 }
                 using (Stream responseStream = response.GetResponseStream()) {
@@ -163,8 +167,51 @@ namespace PersistentMapClient {
                 }
                 return true;
             }
-            catch (Exception e) {
+            catch (WebException e)
+            {
+                switch(((HttpWebResponse)e.Response).StatusCode)
+                {
+                    case HttpStatusCode.InternalServerError:
+                        errorText = "Internal Server, please make a discord ticket!";
+                        break;
+                    case HttpStatusCode.NotFound:
+                        errorText = "Connection Error, Try again later";
+                        break;
+                    case HttpStatusCode.BadRequest:
+                        errorText = "Improper client code, please make a discord ticket and provide this save";
+                        break;
+                    case HttpStatusCode.Conflict:
+                        errorText = "This career is from a not current season career and cannot particpate on the war map";
+                        break;
+                    case HttpStatusCode.Forbidden:
+                        errorText = "This career has been banned from particpating on the war map, contact a roguewar moderator or admin for additional details";
+                        break;
+                    case HttpStatusCode.ExpectationFailed:
+                        errorText = "Cooldown is in affect, results not posted";
+                        break;
+                    case HttpStatusCode.PreconditionFailed:
+                        errorText = "Running multiple saves on a single career is not allowed";
+                        break;
+                    case HttpStatusCode.RequestedRangeNotSatisfiable:
+                        errorText = "Client transmission error, could not determine star system";
+                        break;
+                    case HttpStatusCode.NotAcceptable:
+                        errorText = "Mission results looked suspicious, results not counted, if you believe this is in error, please make a ticket on discord";
+                        break;
+                    case (HttpStatusCode)418:
+                        errorText = "Contract type has not be assigned a value, please contact roguewar admins";
+                        break;
+                    default:
+                        errorText = "Unknown Error, your install may be out of date, if not make a discord ticket";
+                        break;
+                }
                 PersistentMapClient.Logger.LogError(e);
+                return false;
+            }
+            catch (Exception e) {
+                
+                PersistentMapClient.Logger.LogError(e);
+                errorText = "Client Error, consider making a ticket!";
                 return false;
             }
         }
@@ -224,7 +271,12 @@ namespace PersistentMapClient {
                 }
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_requestUrl);
+                
                 request.AutomaticDecompression = DecompressionMethods.GZip;
+                if (Fields.settings.allowSelfSignedCert)
+                {
+                    request.ServerCertificateValidationCallback = (sender, certificate, chain, policyErrors) => { return true; };
+                }
                 request.AllowAutoRedirect = true;
                 request.Method = _requestMethod;
                 request.ContentType = "application/json; charset=utf-8";

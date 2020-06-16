@@ -7,6 +7,7 @@ namespace PersistentMapClient {
 
     public class Settings {
         public string ServerURL = "http://localhost:8000/";
+        public bool allowSelfSignedCert = false;
         public bool debug = false;
         public float priorityContactPayPercentage = 2f;
         public int priorityContractsPerAlly = 2;
