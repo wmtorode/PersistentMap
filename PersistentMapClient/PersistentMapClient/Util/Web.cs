@@ -256,7 +256,7 @@ namespace PersistentMapClient {
                         _requestMethod = "POST";
                         break;
                     case WarService.PostSalvage:
-                        _requestUrl = $"{Fields.settings.ServerURL}warServices/Salvage/{_faction}";
+                        _requestUrl = $"{Fields.settings.ServerURL}api/rogueshopservices/postsalvage/{_faction}";
                         _requestMethod = "POST";
                         break;
                     case WarService.GetFactionShop:

@@ -59,7 +59,7 @@ namespace PersistentMapClient {
                     "BtSaveEdit.MechsAdded", "BtSaveEdit.DebugStatsAccessed" };
                 foreach (string cheat in saveedits) {
                     if (__instance.CompanyStats.ContainsStatistic(cheat)) {
-                        Fields.cheater = true;
+                        //Fields.cheater = true;
                         SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(__instance);
                         interruptQueue.QueueGenericPopup_NonImmediate("Save Edited!", "You have edited your save file in a way that disqualifies you from the war game, your missions wont be influenceing the war. All other fucntions work as normally.", true);
                         break;
@@ -412,6 +412,10 @@ namespace PersistentMapClient {
                                 if (!postSuccessfull) {
                                     SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(game.Simulation);
                                     interruptQueue.QueueGenericPopup_NonImmediate("Post Failure", errorText, true);
+                                }
+                                else
+                                {
+                                    PersistentMapClient.incrementMissionCount();
                                 }
                                 updated = true;
                                 break;
