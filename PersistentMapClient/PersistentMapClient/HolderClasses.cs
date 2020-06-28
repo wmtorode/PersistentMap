@@ -32,6 +32,7 @@ namespace PersistentMapClient {
         public static bool firstpass = true;
         public static bool warmission = false;
         public static string ShopFileTag = "rt_economy";
+        public static bool canPostSalvage = false;
 
         public static List<string> excludedFactions = new List<string>() { "AuriganMercenaries", "Betrayers", "MagistracyCentrella",
             "MajestyMetals", "MercenaryReviewBoard", "Nautilus", "NoFaction", "FlakJackals", "LocalsBrockwayRefugees",

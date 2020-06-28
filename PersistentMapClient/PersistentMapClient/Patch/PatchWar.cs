@@ -412,10 +412,12 @@ namespace PersistentMapClient {
                                 if (!postSuccessfull) {
                                     SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(game.Simulation);
                                     interruptQueue.QueueGenericPopup_NonImmediate("Post Failure", errorText, true);
+                                    Fields.canPostSalvage = false;
                                 }
                                 else
                                 {
                                     PersistentMapClient.incrementMissionCount();
+                                    Fields.canPostSalvage = true;
                                 }
                                 updated = true;
                                 break;

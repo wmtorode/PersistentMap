@@ -64,7 +64,7 @@ namespace PersistentMapClient {
         static void Postfix(Contract __instance, List<SalvageDef> ___finalPotentialSalvage) {
             try {
                 SimGameState simulation = __instance.BattleTechGame.Simulation;
-                if (simulation.IsFactionAlly(__instance.Override.employerTeam.FactionValue, null)) {
+                if (simulation.IsFactionAlly(__instance.Override.employerTeam.FactionValue, null) && Fields.canPostSalvage) {
                     Web.PostUnusedSalvage(___finalPotentialSalvage, __instance.Override.employerTeam.FactionValue);
                 }
             }
