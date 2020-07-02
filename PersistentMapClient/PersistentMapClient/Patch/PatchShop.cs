@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace PersistentMapClient {
 
-    [HarmonyPatch(typeof(SG_Shop_Screen), "ChangeToStoreTypeState")]
+    /*[HarmonyPatch(typeof(SG_Shop_Screen), "ChangeToStoreTypeState")]
     public static class SG_Shop_Screen_ChangeToStoreTypeState_Patch {
         static void Prefix(SG_Shop_Screen __instance, SG_Shop_Screen.StoreType newType, Shop.ShopType ___shopType, StarSystem ___theSystem, SimGameState ___simState) {
             try {
@@ -56,7 +56,7 @@ namespace PersistentMapClient {
                 return true;
             }
         }
-    }
+    }*/
 
     
     [HarmonyPatch(typeof(Contract), "FinalizeSalvage")]
@@ -246,7 +246,7 @@ namespace PersistentMapClient {
     //    }
     //}
 
-    [HarmonyPatch(typeof(Shop), "GetPrice")]
+    /*[HarmonyPatch(typeof(Shop), "GetPrice")]
     public static class Shop_GetPrice_Patch {
         static void Postfix(Shop __instance, ShopDefItem item, Shop.ShopType shopType, ref int __result) {
             try {
@@ -259,5 +259,5 @@ namespace PersistentMapClient {
                 PersistentMapClient.Logger.LogError(e);
             }
         }
-    }
+    }*/
 }
