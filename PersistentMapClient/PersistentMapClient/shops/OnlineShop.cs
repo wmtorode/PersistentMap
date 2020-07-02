@@ -12,8 +12,11 @@ using UnityEngine;
 
 namespace PersistentMapClient.shops
 {
-    class OnlineShop: IShopDescriptor, IListShop, IFillWidgetFromFaction, ISpriteIcon
+    class OnlineShop: IShopDescriptor, IListShop, IFillWidgetFromFaction, ISpriteIcon, ICustomDiscount, IDefaultPrice
     {
+        private int updateAfterMinutesElapsed = 15;
+        private DateTime nextUpdate = DateTime.UtcNow;
+        private bool needsRefresh = false;
         public virtual FactionValue RelatedFaction => Control.State.CurrentSystem.Def.FactionShopOwnerValue;
 
         public int SortOrder => Control.Settings.FactionShopPriority;
@@ -39,7 +42,7 @@ namespace PersistentMapClient.shops
         public bool CanUse => Exists;
 
         public string Name => "Online";
-        public string TabText => RelatedFaction == null ? "ERROR_FACTION" : RelatedFaction.Name + "Online";
+        public string TabText => RelatedFaction == null ? "ERROR_FACTION" : RelatedFaction.Name + " Online";
 
         private List<ShopDefItem> inventory = new List<ShopDefItem>();
 
@@ -102,6 +105,31 @@ namespace PersistentMapClient.shops
             {
                 inventory = new List<ShopDefItem>();
             }
+        }
+
+        public List<ShopDefItem> Items
+        {
+            get 
+            {
+                if (DateTime.UtcNow > this.nextUpdate || this.needsRefresh)
+                {
+                    this.RefreshShop();
+                    this.nextUpdate = DateTime.UtcNow;
+                    this.nextUpdate.AddMinutes(this.updateAfterMinutesElapsed);
+                    this.needsRefresh = false;
+                }
+                return this.inventory;
+            }
+        }
+
+        /*public int GetPrice(TypedShopDefItem item)
+        {
+            return (int)(item.Description.Cost * item.DiscountModifier);
+        }*/
+
+        public float GetDiscount(TypedShopDefItem item)
+        {
+            return item.DiscountModifier;
         }
     }
 }

@@ -260,7 +260,7 @@ namespace PersistentMapClient {
                         _requestMethod = "POST";
                         break;
                     case WarService.GetFactionShop:
-                        _requestUrl = $"{Fields.settings.ServerURL}warServices/Shop/{_faction}";
+                        _requestUrl = $"{Fields.settings.ServerURL}api/rogueshopservices/getshop/{_faction}";
                         _requestMethod = "GET";
                         break;
                     case WarService.GetStarMap:

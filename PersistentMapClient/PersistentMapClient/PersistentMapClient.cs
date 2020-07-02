@@ -3,6 +3,8 @@ using Newtonsoft.Json;
 using System;
 using System.Reflection;
 using BattleTech;
+using CustomShops;
+using PersistentMapClient.shops;
 
 namespace PersistentMapClient {
 
@@ -52,6 +54,7 @@ namespace PersistentMapClient {
             
             var harmony = HarmonyInstance.Create("de.morphyum.PersistentMapClient");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Control.RegisterShop(new OnlineShop());
         }
 
         // Used for Unit Tests only
