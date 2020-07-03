@@ -17,6 +17,7 @@ namespace PersistentMapClient.shops
         private int updateAfterMinutesElapsed = 15;
         private DateTime nextUpdate = DateTime.UtcNow;
         private bool needsRefresh = false;
+
         public virtual FactionValue RelatedFaction => Control.State.CurrentSystem.Def.FactionShopOwnerValue;
 
         public int SortOrder => Control.Settings.FactionShopPriority;
@@ -105,6 +106,9 @@ namespace PersistentMapClient.shops
             {
                 inventory = new List<ShopDefItem>();
             }
+            this.nextUpdate = DateTime.UtcNow;
+            this.nextUpdate.AddMinutes(this.updateAfterMinutesElapsed);
+            this.needsRefresh = false;
         }
 
         public List<ShopDefItem> Items
@@ -114,9 +118,6 @@ namespace PersistentMapClient.shops
                 if (DateTime.UtcNow > this.nextUpdate || this.needsRefresh)
                 {
                     this.RefreshShop();
-                    this.nextUpdate = DateTime.UtcNow;
-                    this.nextUpdate.AddMinutes(this.updateAfterMinutesElapsed);
-                    this.needsRefresh = false;
                 }
                 return this.inventory;
             }

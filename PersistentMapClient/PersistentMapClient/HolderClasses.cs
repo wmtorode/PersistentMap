@@ -39,13 +39,8 @@ namespace PersistentMapClient {
             "SelfEmployed", "MasonsMarauders", "SteelBeast", "KellHounds", "RazorbackMercs", "HostileMercenaries" };
         public static PersistentMapAPI.StarMap currentMap;
 
-        public static Dictionary<Faction, List<ShopDefItem>> currentShops = new Dictionary<Faction, List<ShopDefItem>>();
-        public static KeyValuePair<Faction, List<ShopDefItem>> currentShopSold =
-            new KeyValuePair<Faction, List<ShopDefItem>>(Faction.INVALID_UNSET, new List<ShopDefItem>());
-        public static KeyValuePair<Faction, List<string>> currentShopBought =
-            new KeyValuePair<Faction, List<string>>(Faction.INVALID_UNSET, new List<string>());
-        public static Dictionary<string, DateTime> LastUpdate = new Dictionary<string, DateTime>();
-        public static int UpdateTimer = 15;
+        public static FactionValue currentShopOwner;
+        public static List<string> shopItemsSold = new List<string>();
 
 
         //prioFields
