@@ -2,6 +2,7 @@
 using BattleTech.Framework;
 using System;
 using System.Collections.Generic;
+using PersistentMapAPI;
 
 namespace PersistentMapClient {
 
@@ -40,7 +41,7 @@ namespace PersistentMapClient {
         public static PersistentMapAPI.StarMap currentMap;
 
         public static FactionValue currentShopOwner;
-        public static List<string> shopItemsSold = new List<string>();
+        public static Dictionary<string, PurchasedItem> shopItemsSold = new Dictionary<string, PurchasedItem>();
 
 
         //prioFields

@@ -49,6 +49,7 @@
     <Compile Include="Objects\Company.cs" />
     <Compile Include="Objects\FactionControl.cs" />
     <Compile Include="Objects\MissionResult.cs" />
+    <Compile Include="Objects\PurchasedItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Objects\StarMap.cs" />
     <Compile Include="Objects\System.cs" />
