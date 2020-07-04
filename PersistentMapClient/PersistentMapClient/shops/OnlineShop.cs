@@ -9,14 +9,16 @@ using PersistentMapClient;
 using BattleTech.UI;
 using HBS;
 using UnityEngine;
+using PersistentMapAPI;
 
 namespace PersistentMapClient.shops
 {
-    class OnlineShop: IShopDescriptor, IListShop, IFillWidgetFromFaction, ISpriteIcon, ICustomDiscount, IDefaultPrice
+    class OnlineShop: IShopDescriptor, IListShop, IFillWidgetFromFaction, ISpriteIcon, ICustomDiscount, IDefaultPrice, ICustomPurshase, ISellShop
     {
         private int updateAfterMinutesElapsed = 15;
         private DateTime nextUpdate = DateTime.UtcNow;
-        private bool needsRefresh = false;
+        public bool needsRefresh = false;
+        public int SellPriority => 1;
 
         public virtual FactionValue RelatedFaction => Control.State.CurrentSystem.Def.FactionShopOwnerValue;
 
@@ -101,13 +103,19 @@ namespace PersistentMapClient.shops
 
         public void RefreshShop()
         {
-            inventory = Web.GetShopForFaction(RelatedFaction);
-            if (inventory == null)
+            if (!Control.State.Sim.IsFactionAlly(RelatedFaction))
             {
                 inventory = new List<ShopDefItem>();
             }
-            this.nextUpdate = DateTime.UtcNow;
-            this.nextUpdate.AddMinutes(this.updateAfterMinutesElapsed);
+            else
+            {
+                inventory = Web.GetShopForFaction(RelatedFaction);
+                if (inventory == null)
+                {
+                    inventory = new List<ShopDefItem>();
+                }
+            }
+            this.nextUpdate = DateTime.UtcNow.AddMinutes(this.updateAfterMinutesElapsed);
             this.needsRefresh = false;
         }
 
@@ -115,8 +123,10 @@ namespace PersistentMapClient.shops
         {
             get 
             {
-                if (DateTime.UtcNow > this.nextUpdate || this.needsRefresh)
+                if ((DateTime.UtcNow.Ticks > this.nextUpdate.Ticks) || this.needsRefresh)
                 {
+                    PersistentMapClient.Logger.Log($"Time has elapsed, refreshing shop, {DateTime.UtcNow.Ticks}, {this.nextUpdate.Ticks}, {this.needsRefresh}");
+
                     this.RefreshShop();
                 }
                 return this.inventory;
@@ -130,7 +140,34 @@ namespace PersistentMapClient.shops
 
         public float GetDiscount(TypedShopDefItem item)
         {
+            if (item == null)
+            {
+                PersistentMapClient.Logger.LogIfDebug("Null discount item recvd");
+                return 1.0f;
+            }
             return item.DiscountModifier;
+        }
+
+        public void Purshase(ShopDefItem item, int quantity)
+        {
+            Fields.currentShopOwner = RelatedFaction;
+            if (!Fields.shopItemsSold.ContainsKey(item.ID))
+            {
+                PurchasedItem pItem = new PurchasedItem();
+                pItem.ID = item.ID;
+                pItem.Count = quantity;
+                Fields.shopItemsSold.Add(item.ID, pItem);
+            }
+            else
+            {
+                Fields.shopItemsSold[item.ID].Count += quantity;
+            }
+            UIControler.DefaultPurshase(this, item, quantity);
+        }
+
+        public bool OnSellItem(ShopDefItem item, int num)
+        {
+            return false;
         }
     }
 }

@@ -18,6 +18,7 @@ namespace PersistentMapClient {
         internal static Logger Logger;
         internal static string ModDirectory;
         internal static StatCollection companyStats;
+        internal static OnlineShop shop;
 
         public static void Init(string directory, string settingsJSON) {
             ModDirectory = directory;
@@ -54,7 +55,8 @@ namespace PersistentMapClient {
             
             var harmony = HarmonyInstance.Create("de.morphyum.PersistentMapClient");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-            Control.RegisterShop(new OnlineShop());
+            shop = new OnlineShop();
+            Control.RegisterShop(shop);
         }
 
         // Used for Unit Tests only

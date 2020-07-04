@@ -360,6 +360,7 @@ namespace PersistentMapClient {
                 else {
                     Fields.firstpass = false;
                 }
+                PersistentMapClient.shop.RefreshShop();
             }
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);

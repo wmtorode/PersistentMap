@@ -202,32 +202,41 @@ namespace PersistentMapClient {
     //}
     
 
-    //[HarmonyPatch(typeof(SG_Shop_Screen), "OnCompleted")]
-    //public static class SG_Shop_Screen_OnCompleted_Patch {
-    //    static void Postfix() {
-    //        try {
-    //            if (Fields.currentShopSold.Key != Faction.INVALID_UNSET) {
-    //                Web.PostSoldItems(Fields.currentShopSold.Value, Fields.currentShopSold.Key);
-    //                Fields.currentShopSold = new KeyValuePair<Faction, List<ShopDefItem>>(Faction.INVALID_UNSET, new List<ShopDefItem>());
-    //            }
-    //            if (Fields.currentShopBought.Key != Faction.INVALID_UNSET) {
-    //                Web.PostBuyItems(Fields.currentShopBought.Value, Fields.currentShopBought.Key);
-    //                foreach (string id in Fields.currentShopBought.Value) {
-    //                    ShopDefItem match = Fields.currentShops[Fields.currentShopBought.Key].FirstOrDefault(x => x.ID.Equals(id));
-    //                    if (match != null) {
-    //                        if (match.Count == 0) {
-    //                            Fields.currentShops[Fields.currentShopBought.Key].Remove(match);
-    //                        }
-    //                    }
-    //                }
-    //                Fields.currentShopBought = new KeyValuePair<Faction, List<string>>(Faction.INVALID_UNSET, new List<string>());               
-    //            }
-    //        }
-    //        catch (Exception e) {
-    //           PersistentMapClient.Logger.LogError(e);
-    //        }
-    //    }
-    //}
+    [HarmonyPatch(typeof(SG_Shop_Screen), "OnCompleted")]
+    public static class SG_Shop_Screen_OnCompleted_Patch {
+        static void Postfix() {
+            try {
+                if (Fields.currentShopOwner != FactionEnumeration.GetInvalidUnsetFactionValue()) {
+                    //Web.PostSoldItems(Fields.currentShopSold.Value, Fields.currentShopSold.Key);
+                    //Fields.currentShopSold = new KeyValuePair<Faction, List<ShopDefItem>>(Faction.INVALID_UNSET, new List<ShopDefItem>());
+                    Web.PostBuyItems(Fields.shopItemsSold, Fields.currentShopOwner);
+                    if(Fields.shopItemsPosted.Count() > 0)
+                    {
+                        Web.PostSoldItems(Fields.shopItemsPosted, Fields.currentShopOwner);
+                        Fields.shopItemsPosted = new Dictionary<string, ShopDefItem>();
+                    }
+                    //foreach (string id in Fields.currentShopBought.Value) {
+                    //    ShopDefItem match = Fields.currentShops[Fields.currentShopBought.Key].FirstOrDefault(x => x.ID.Equals(id));
+                    //    if (match != null) {
+                    //       if (match.Count == 0) {
+                    //            Fields.currentShops[Fields.currentShopBought.Key].Remove(match);
+                    //        }
+                    //    }
+                    //}
+                    //Fields.currentShopBought = new KeyValuePair<Faction, List<string>>(Faction.INVALID_UNSET, new List<string>());  
+                    if (Fields.shopItemsSold.Count() > 0)
+                    {
+                        PersistentMapClient.shop.needsRefresh = true;
+                    }
+                    Fields.shopItemsSold = new Dictionary<string, PersistentMapAPI.PurchasedItem>();
+                    
+                }
+            }
+            catch (Exception e) {
+              PersistentMapClient.Logger.LogError(e);
+            }
+        }
+    }
 
     //[HarmonyPatch(typeof(Shop), "Purchase")]
     //public static class Shop_Purchase_Patch {

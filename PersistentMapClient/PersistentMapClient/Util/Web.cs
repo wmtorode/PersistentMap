@@ -4,6 +4,7 @@ using PersistentMapAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 
@@ -17,8 +18,45 @@ namespace PersistentMapClient {
             GetStarMap,
             PostBuyItems,
             PostMissionResult,
-            PostSalvage
-        }        
+            PostSalvage,
+            PostSoldItems,
+            GetServerSettings,
+        }
+
+        private static ServerSettings serverSettings = new ServerSettings();
+        private static DateTime nextRefresh = DateTime.UtcNow;
+
+        public static bool CanPostSoldItems()
+        {
+            RefreshServerSettings();
+            return serverSettings.CanPostCanPostSoldItems;
+        }
+
+        private static void RefreshServerSettings()
+        {
+            if (DateTime.UtcNow > nextRefresh)
+            {
+                try
+                {
+
+                    HttpWebRequest request = new RequestBuilder(WarService.GetServerSettings).Build();
+                    HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+
+                    using (Stream responseStream = response.GetResponseStream())
+                    {
+                        StreamReader reader = new StreamReader(responseStream);
+                        string itemsstring = reader.ReadToEnd();
+                        serverSettings = JsonConvert.DeserializeObject<ServerSettings>(itemsstring);
+                    }
+                    nextRefresh = DateTime.UtcNow.AddMinutes(15);
+                }
+                catch (Exception e)
+                {
+                    PersistentMapClient.Logger.LogError(e);
+                }
+            }
+        }
+
 
         // Pulls the inventory for the specified faction
         public static List<ShopDefItem> GetShopForFaction(FactionValue faction) {
@@ -90,15 +128,12 @@ namespace PersistentMapClient {
         }
 
         // Anything the user sells goes into faction inventory as well.
-        public static bool PostSoldItems(List<ShopDefItem> items, FactionValue faction) {
-            foreach (ShopDefItem item in items) {
-                item.DiscountModifier = 1f;
-                item.Count = 1;
-            }
-            string testjson = JsonConvert.SerializeObject(items);
-            HttpWebRequest request = new RequestBuilder(WarService.PostSalvage).Faction(faction).PostData(testjson).Build();
+        public static bool PostSoldItems(Dictionary<string, ShopDefItem> items, FactionValue faction) {
+            string testjson = JsonConvert.SerializeObject(items.Values.ToList<ShopDefItem>());
+            HttpWebRequest request = new RequestBuilder(WarService.PostSoldItems).Faction(faction).PostData(testjson).Build();
             HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-            using (Stream responseStream = response.GetResponseStream()) {
+            using (Stream responseStream = response.GetResponseStream())
+            {
                 StreamReader reader = new StreamReader(responseStream);
                 string mapstring = reader.ReadToEnd();
                 return true;
@@ -106,14 +141,28 @@ namespace PersistentMapClient {
         }
 
         // Send a list of items to purchase from the faction store
-        public static bool PostBuyItems(List<string> ids, FactionValue owner) {
+        public static bool PostBuyItems(Dictionary<string, PurchasedItem> sold, FactionValue owner) {
             try {
-                string testjson = JsonConvert.SerializeObject(ids);
-                HttpWebRequest request = new RequestBuilder(WarService.PostBuyItems).Faction(owner).PostData(testjson).Build();
-                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-                using (Stream responseStream = response.GetResponseStream()) {
-                    StreamReader reader = new StreamReader(responseStream);
-                    string mapstring = reader.ReadToEnd();
+                if (sold == null || owner == null)
+                {
+                    PersistentMapClient.Logger.LogIfDebug("null owner or dictionary");
+                    return false;
+                }
+                if (sold.Count() > 0)
+                {
+                    string testjson = JsonConvert.SerializeObject(sold.Values.ToList<PurchasedItem>());
+                    HttpWebRequest request = new RequestBuilder(WarService.PostBuyItems).Faction(owner).PostData(testjson).Build();
+                    HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+                    using (Stream responseStream = response.GetResponseStream())
+                    {
+                        StreamReader reader = new StreamReader(responseStream);
+                        string mapstring = reader.ReadToEnd();
+                        return true;
+                    }
+                }
+                else
+                {
+                    PersistentMapClient.Logger.Log("No online items purchased, nothing to do");
                     return true;
                 }
             }
@@ -248,7 +297,7 @@ namespace PersistentMapClient {
             public HttpWebRequest Build() {
                 switch (_service) {
                     case WarService.PostBuyItems:
-                        _requestUrl = $"{Fields.settings.ServerURL}warServices/Buy/{_faction}";
+                        _requestUrl = $"{Fields.settings.ServerURL}api/rogueshopservices/purchasefromshop/{_faction}";
                         _requestMethod = "POST";
                         break;
                     case WarService.PostMissionResult:
@@ -259,8 +308,16 @@ namespace PersistentMapClient {
                         _requestUrl = $"{Fields.settings.ServerURL}api/rogueshopservices/postsalvage/{_faction}";
                         _requestMethod = "POST";
                         break;
+                    case WarService.PostSoldItems:
+                        _requestUrl = $"{Fields.settings.ServerURL}api/rogueshopservices/postsolditems/{_faction}";
+                        _requestMethod = "POST";
+                        break;
                     case WarService.GetFactionShop:
                         _requestUrl = $"{Fields.settings.ServerURL}api/rogueshopservices/getshop/{_faction}";
+                        _requestMethod = "GET";
+                        break;
+                    case WarService.GetServerSettings:
+                        _requestUrl = $"{Fields.settings.ServerURL}api/roguesettingservice/getsettings";
                         _requestMethod = "GET";
                         break;
                     case WarService.GetStarMap:
