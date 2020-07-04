@@ -15,6 +15,7 @@ namespace PersistentMapClient {
         public string ClientID = "";
         public float activePlayerMarkerSize = 3.5f;
         public string Season = "Debug01";
+        public bool SortByRealDifficulty = false;
 
         public override string ToString() {
             return $"ServerURL:({ServerURL}) ClientID:({ClientID}) Debug:({debug}) PriorityContractPay%:({priorityContactPayPercentage}) PriorityContractsPerAlly:{priorityContractsPerAlly} ActivePlayerMarkerSize:({activePlayerMarkerSize})";

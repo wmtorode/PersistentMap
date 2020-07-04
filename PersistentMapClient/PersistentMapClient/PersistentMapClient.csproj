@@ -33,6 +33,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Patch\PatchContractSort.cs" />
     <Compile Include="Patch\PatchShop.cs" />
     <Compile Include="Patch\PatchWar.cs" />
     <Compile Include="shops\OnlineShop.cs" />
@@ -42,6 +43,7 @@
     <Compile Include="PersistentMapClient.cs" />
     <Compile Include="Util\Helper.cs" />
     <Compile Include="Util\Logger.cs" />
+    <Compile Include="Util\ReflectionHelper.cs" />
     <Compile Include="Util\Web.cs" />
   </ItemGroup>
   <ItemGroup>
