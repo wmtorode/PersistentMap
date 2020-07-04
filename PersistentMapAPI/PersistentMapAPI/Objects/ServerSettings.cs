@@ -8,6 +8,6 @@ namespace PersistentMapAPI
 {
     public class ServerSettings
     {
-        public bool CanPostCanPostSoldItems = false;
+        public bool CanPostSoldItems = false;
     }
 }

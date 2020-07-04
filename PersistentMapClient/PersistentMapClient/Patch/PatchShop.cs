@@ -214,6 +214,7 @@ namespace PersistentMapClient {
                     {
                         Web.PostSoldItems(Fields.shopItemsPosted, Fields.currentShopOwner);
                         Fields.shopItemsPosted = new Dictionary<string, ShopDefItem>();
+                        PersistentMapClient.shop.needsRefresh = true;
                     }
                     //foreach (string id in Fields.currentShopBought.Value) {
                     //    ShopDefItem match = Fields.currentShops[Fields.currentShopBought.Key].FirstOrDefault(x => x.ID.Equals(id));

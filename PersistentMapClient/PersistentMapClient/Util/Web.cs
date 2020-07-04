@@ -29,7 +29,8 @@ namespace PersistentMapClient {
         public static bool CanPostSoldItems()
         {
             RefreshServerSettings();
-            return serverSettings.CanPostCanPostSoldItems;
+            PersistentMapClient.Logger.Log($"Can Post Sold {serverSettings.CanPostSoldItems}");
+            return serverSettings.CanPostSoldItems;
         }
 
         private static void RefreshServerSettings()

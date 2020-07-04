@@ -167,6 +167,21 @@ namespace PersistentMapClient.shops
 
         public bool OnSellItem(ShopDefItem item, int num)
         {
+            if (Exists && Web.CanPostSoldItems())
+            {
+                Fields.currentShopOwner = RelatedFaction;
+                if (!Fields.shopItemsPosted.ContainsKey(item.ID))
+                {
+                    ShopDefItem pItem = new ShopDefItem(item);
+                    pItem.Count = num;
+                    Fields.shopItemsPosted.Add(item.ID, pItem);
+                }
+                else
+                {
+                    Fields.shopItemsPosted[item.ID].Count += num;
+                }
+                return true;
+            }
             return false;
         }
     }
