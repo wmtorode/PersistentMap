@@ -184,6 +184,59 @@ namespace PersistentMapClient {
             }
         }
 
+        public static bool IsWarBorder(StarSystem system, SimGameState Sim)
+        {
+            try
+            {
+                bool result = false;
+                if (Sim.Starmap != null)
+                {
+                    if (system.OwnerValue.Name != FactionEnumeration.GetNoFactionValue().Name)
+                    {
+                        foreach (StarSystem neigbourSystem in Sim.Starmap.GetAvailableNeighborSystem(system))
+                        {
+                            if (system.OwnerDef.Enemies.Contains(neigbourSystem.OwnerValue.Name) && neigbourSystem.OwnerValue.Name != FactionEnumeration.GetNoFactionValue().Name)
+                            {
+                                result = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                PersistentMapClient.Logger.LogError(ex);
+                return false;
+            }
+        }
+
+        public static bool IsRandomTravelBorder(StarSystem system, SimGameState Sim)
+        {
+            try
+            {
+                bool result = false;
+                if (Sim.Starmap != null)
+                {
+                    foreach (StarSystem neigbourSystem in Sim.Starmap.GetAvailableNeighborSystem(system))
+                    {
+                        if (system.OwnerDef.ID != neigbourSystem.OwnerDef.ID)
+                        {
+                            result = true;
+                            break;
+                        }
+                    }
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                PersistentMapClient.Logger.LogError(ex);
+                return false;
+            }
+        }
+
         public static StarSystem ChangeWarDescription(StarSystem system, SimGameState Sim, PersistentMapAPI.System warsystem) {
             try {
                 if (IsBorder(system, Sim)) {

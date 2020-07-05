@@ -34,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Patch\PatchContractSort.cs" />
+    <Compile Include="Patch\PatchRandomTravelContracts.cs" />
     <Compile Include="Patch\PatchShop.cs" />
     <Compile Include="Patch\PatchWar.cs" />
     <Compile Include="shops\OnlineShop.cs" />

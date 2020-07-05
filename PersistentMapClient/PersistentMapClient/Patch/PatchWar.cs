@@ -440,6 +440,28 @@ namespace PersistentMapClient {
 
     [HarmonyPatch(typeof(StarSystem), "GenerateInitialContracts")]
     public static class StarSystem_GenerateInitialContracts_Patch {
+
+        static bool Prefix(StarSystem __instance, Action onContractsFetched = null)
+        {
+            try
+            {
+                ReflectionHelper.SetPrivateField(__instance, "contractRetrievalCallback", onContractsFetched);
+
+                __instance.Sim.GeneratePotentialContracts(true, null, null, true);
+
+                Action action = (Action)Delegate.CreateDelegate(typeof(Action), __instance, "OnInitialContractFetched");
+                List<StarSystem> travels = __instance.Sim.StarSystems;
+                travels.Shuffle<StarSystem>();
+                __instance.Sim.GeneratePotentialContracts(true, action, travels[0], true);
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+                return false;
+            }
+        }
         static void Postfix(StarSystem __instance) {
             try {
                 __instance.Sim.GlobalContracts.Clear();

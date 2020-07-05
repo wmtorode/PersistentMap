@@ -16,6 +16,8 @@ namespace PersistentMapClient {
         public float activePlayerMarkerSize = 3.5f;
         public string Season = "Debug01";
         public bool SortByRealDifficulty = false;
+        public float percentageOfTravelOnBorder = 0.5f;
+        public bool warBorders = false;
 
         public override string ToString() {
             return $"ServerURL:({ServerURL}) ClientID:({ClientID}) Debug:({debug}) PriorityContractPay%:({priorityContactPayPercentage}) PriorityContractsPerAlly:{priorityContractsPerAlly} ActivePlayerMarkerSize:({activePlayerMarkerSize})";
@@ -35,6 +37,7 @@ namespace PersistentMapClient {
         public static bool warmission = false;
         public static string ShopFileTag = "rt_economy";
         public static bool canPostSalvage = false;
+        public static int currBorderCons = 0;
 
         public static List<string> excludedFactions = new List<string>() { "AuriganMercenaries", "Betrayers", "MagistracyCentrella",
             "MajestyMetals", "MercenaryReviewBoard", "Nautilus", "NoFaction", "FlakJackals", "LocalsBrockwayRefugees",
