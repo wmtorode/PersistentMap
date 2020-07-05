@@ -20,7 +20,7 @@ namespace PersistentMapClient.shops
         public bool needsRefresh = false;
         public int SellPriority => 1;
 
-        public virtual FactionValue RelatedFaction => Control.State.CurrentSystem.Def.FactionShopOwnerValue;
+        public virtual FactionValue RelatedFaction => Control.State.CurrentSystem.OwnerValue;
 
         public int SortOrder => Control.Settings.FactionShopPriority;
         public bool RefreshOnSystemChange => true;
