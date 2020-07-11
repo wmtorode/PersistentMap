@@ -244,7 +244,7 @@ namespace PersistentMapClient {
                     factionList.Add("Current Control:");
                     foreach (FactionControl fc in warsystem.factions) {
                         if (fc.control != 0) {
-                            factionList.Add(GetFactionName(fc.Name) + ": " + fc.control + "%");
+                            factionList.Add(GetFactionName(fc.Name) + $": Companies: {fc.ActivePlayers}, Control: {fc.control}%");
                         }
                     }
                     if (!Fields.FluffDescriptions.ContainsKey(system.Name)) {
