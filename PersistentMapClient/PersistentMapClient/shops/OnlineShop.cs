@@ -69,20 +69,21 @@ namespace PersistentMapClient.shops
                 if (!Exists)
                     return null;
 
-                var owner = Control.State.CurrentSystem.Def.FactionShopOwnerValue;
+                var owner = RelatedFaction;
                 if (owner == null)
                     return null;
 
                 return owner.FactionDef.GetSprite();
             }
         }
+
         public Color IconColor
         {
             get
             {
                 if (!Exists)
                     return Color.white;
-                var owner = Control.State.CurrentSystem.Def.FactionShopOwnerValue;
+                var owner = RelatedFaction;
                 if (owner == null)
                     return Color.white; // LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.FactionStoreColor.color;
                 return Color.white; //owner.FactionDef.GetFactionStoreColor(out var color) ? color : LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.FactionStoreColor.color;

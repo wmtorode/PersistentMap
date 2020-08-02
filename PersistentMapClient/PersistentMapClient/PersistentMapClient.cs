@@ -56,7 +56,7 @@ namespace PersistentMapClient {
             var harmony = HarmonyInstance.Create("de.morphyum.PersistentMapClient");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             shop = new OnlineShop();
-            Control.RegisterShop(shop);
+            Control.RegisterShop(shop, new string[] {"systemchange", "ContractComplete", "OwnerChange" });
         }
 
         // Used for Unit Tests only
