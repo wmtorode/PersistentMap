@@ -30,7 +30,7 @@ namespace PersistentMapClient {
     public static class SG_Shop_Screen_OnCompleted_Patch {
         static void Postfix() {
             try {
-                if (Fields.currentShopOwner != FactionEnumeration.GetInvalidUnsetFactionValue()) {
+                if (Fields.currentShopOwner != FactionEnumeration.GetInvalidUnsetFactionValue() && PersistentMapClient.shop.Exists) {
                     Web.PostBuyItems(Fields.shopItemsSold, Fields.currentShopOwner);
                     if(Fields.shopItemsPosted.Count() > 0)
                     {

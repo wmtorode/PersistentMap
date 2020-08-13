@@ -9,6 +9,7 @@ namespace PersistentMapAPI {
         public string name;
         public int Players;
         public string owner;
+        public bool immuneFromWar;
 
         public FactionControl FindFactionControlByFaction(string faction) {
             if(factions == null) {

@@ -299,6 +299,11 @@ namespace PersistentMapClient {
                     if (system == null) {
                         PersistentMapClient.Logger.Log("System in map null");
                     }
+                    if(system.immuneFromWar)
+                    {
+                        PersistentMapClient.Logger.Log($"System is immune from war: {system.name}");
+                        continue;
+                    }
                     if (system.Players > 0) {
                        AddActivePlayersBadgeToSystem(system);
                     }
