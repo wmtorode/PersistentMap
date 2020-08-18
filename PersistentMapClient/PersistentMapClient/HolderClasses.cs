@@ -40,8 +40,9 @@ namespace PersistentMapClient {
         public static string ShopFileTag = "rt_economy";
         public static bool canPostSalvage = false;
         public static int currBorderCons = 0;
+        public static bool needsToReloadEnemies = false;
+        public static List<string> immuneFromWar = new List<string>();
         public static List<string> enemyHolder = new List<string>();
-
         public static List<string> excludedFactions = new List<string>() { "AuriganMercenaries", "Betrayers", "MagistracyCentrella",
             "MajestyMetals", "MercenaryReviewBoard", "Nautilus", "NoFaction", "FlakJackals", "LocalsBrockwayRefugees",
             "SelfEmployed", "MasonsMarauders", "SteelBeast", "KellHounds", "RazorbackMercs", "HostileMercenaries" };

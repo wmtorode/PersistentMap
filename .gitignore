@@ -243,3 +243,4 @@ ModelManifest.xml
 
 # Unit-test driven generated settings
 generatedSettings.json
+/API/PersistentMapAPI.dll

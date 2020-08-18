@@ -302,7 +302,11 @@ namespace PersistentMapClient {
                     if(system.immuneFromWar)
                     {
                         PersistentMapClient.Logger.Log($"System is immune from war: {system.name}");
-                        continue;
+                        if (!Fields.immuneFromWar.Contains(system.name))
+                        {
+                            Fields.immuneFromWar.Add(system.name);
+                        }
+                        //continue;
                     }
                     if (system.Players > 0) {
                        AddActivePlayersBadgeToSystem(system);
@@ -365,7 +369,7 @@ namespace PersistentMapClient {
                 else {
                     Fields.firstpass = false;
                 }
-                PersistentMapClient.shop.RefreshShop();
+                //PersistentMapClient.shop.RefreshShop();
             }
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);
@@ -446,18 +450,20 @@ namespace PersistentMapClient {
     [HarmonyPatch(typeof(StarSystem), "GenerateInitialContracts")]
     public static class StarSystem_GenerateInitialContracts_Patch {
 
+        static ContractGenCallback contractGenCallback = new ContractGenCallback();
+
         static bool Prefix(StarSystem __instance, Action onContractsFetched = null)
         {
             try
             {
+                //PersistentMapClient.Logger.Log($"Gen Init Prefix: {__instance.Name}");
                 ReflectionHelper.SetPrivateField(__instance, "contractRetrievalCallback", onContractsFetched);
+                Action action = (Action)Delegate.CreateDelegate(typeof(Action), contractGenCallback, "callbackAction");
 
-                __instance.Sim.GeneratePotentialContracts(true, null, null, true);
-
-                Action action = (Action)Delegate.CreateDelegate(typeof(Action), __instance, "OnInitialContractFetched");
-                List<StarSystem> travels = __instance.Sim.StarSystems;
-                travels.Shuffle<StarSystem>();
-                __instance.Sim.GeneratePotentialContracts(true, action, travels[0], true);
+                contractGenCallback.lastSystem = __instance;
+                __instance.Sim.GeneratePotentialContracts(true, action, null, true);
+   
+               
 
                 return false;
             }
@@ -469,6 +475,12 @@ namespace PersistentMapClient {
         }
         static void Postfix(StarSystem __instance) {
             try {
+                /*PersistentMapClient.Logger.Log($"Gen Init PostFix: {__instance.Name}");
+                if (Fields.immuneFromWar.Contains(__instance.Name))
+                {
+                    PersistentMapClient.Logger.Log($"Gen Init PostFix, system is immune from war, leaving it be : {__instance.Name}");
+                    //return;
+                }*/
                 __instance.Sim.GlobalContracts.Clear();
                 if (__instance.Sim.HasTravelContract && Fields.warmission) {
                     __instance.Sim.GlobalContracts.Add(__instance.Sim.ActiveTravelContract);
@@ -546,6 +558,7 @@ namespace PersistentMapClient {
         static void Prefix(ref FactionValue employer, ref FactionValue target, ref FactionValue targetsAlly, ref FactionValue employersAlly, ref FactionValue neutralToAll, ref FactionValue hostileToAll) {
             try {
                 if (Fields.prioGen) {
+                    //PersistentMapClient.Logger.Log($"CTC Prio!");
                     employer = Fields.prioEmployer;
                     employersAlly = Fields.prioEmployer;
                     target = Fields.prioTarget;
@@ -566,6 +579,7 @@ namespace PersistentMapClient {
         static void Prefix(ref FactionValue employer, ref FactionValue employersAlly, ref FactionValue target, ref FactionValue targetsAlly, ref FactionValue NeutralToAll, ref FactionValue HostileToAll) {
             try {
                 if (Fields.prioGen) {
+                    //PersistentMapClient.Logger.Log($"Prep Prio!");
                     employer = Fields.prioEmployer;
                     employersAlly = Fields.prioEmployer;
                     target = Fields.prioTarget;

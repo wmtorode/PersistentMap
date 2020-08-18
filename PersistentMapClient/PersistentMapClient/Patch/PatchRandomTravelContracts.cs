@@ -36,6 +36,42 @@ namespace PersistentMapClient
         }
     }
 
+    [HarmonyPatch(typeof(SimGameState), "GenerateContractParticipants")]
+    public static class SimGameState_GenerateContractParticipants_Patch
+    {
+        public static void Prefix(FactionDef employer, StarSystemDef system)
+        {
+
+            if (!Fields.immuneFromWar.Contains(system.Description.Name))
+                return;
+
+            Fields.enemyHolder.Clear();
+            var NewEnemies = system.ContractTargetIDList;
+            Fields.enemyHolder = employer.Enemies.ToList();
+            var NewFactionEnemies = Fields.enemyHolder;
+
+            foreach (var faction in Fields.settings.immuneSystemEnemies)
+            {
+                if (!NewFactionEnemies.Contains(faction) && faction != employer.FactionValue.Name)
+                {
+                        NewFactionEnemies.Add(faction);
+                }
+            }
+
+            Traverse.Create(employer).Property("Enemies").SetValue(NewFactionEnemies.ToArray());
+            Fields.needsToReloadEnemies = true;
+        }
+
+        public static void Postfix(FactionDef employer)
+        {
+            if (Fields.needsToReloadEnemies)
+            {
+                Traverse.Create(employer).Property("Enemies").SetValue(Fields.enemyHolder.ToArray());
+                Fields.needsToReloadEnemies = false;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(StarSystem), "RefreshBreadcrumbs")]
     public static class StarSystem_RefreshBreadcrumbs
     {
@@ -67,7 +103,7 @@ namespace PersistentMapClient
         }
     }
 
-    [HarmonyPatch(typeof(SimGameState), "GeneratePotentialContracts")]
+        [HarmonyPatch(typeof(SimGameState), "GeneratePotentialContracts")]
     public static class SimGameState_GeneratePotentialContracts
     {
 
@@ -77,10 +113,22 @@ namespace PersistentMapClient
             {
                 if (systemOverride == null)
                 {
+                    PersistentMapClient.Logger.Log($"SystemOverride is null, falling back to vanilla generator: {__instance.CurSystem.Name}");
+                    //LazySingletonBehavior<UnityGameInstance>.Instance.StartCoroutine(StartGeneratePotentialContractsRoutine(__instance, clearExistingContracts, onContractGenComplete, systemOverride, useCoroutine));
+                    //return false;
                     return true;
                 }
+                //else
+                //if(Fields.immuneFromWar.Contains(systemOverride.Name))
+                //{
+                //    PersistentMapClient.Logger.Log($"SystemOverride is immune from war, falling back to vanilla generator: {systemOverride.Name}");
+                //    LazySingletonBehavior<UnityGameInstance>.Instance.StartCoroutine(StartGeneratePotentialContractsRoutine(__instance, clearExistingContracts, onContractGenComplete, systemOverride, useCoroutine));
+                //    return false;
+                    //return true;
+                //}
                 else
                 {
+                    PersistentMapClient.Logger.Log($"Using RTC generator: {systemOverride.Name}");
                     LazySingletonBehavior<UnityGameInstance>.Instance.StartCoroutine(StartGeneratePotentialContractsRoutine(__instance, clearExistingContracts, onContractGenComplete, systemOverride, useCoroutine));
                     return false;
                 }
@@ -119,6 +167,7 @@ namespace PersistentMapClient
             {
                 contractList.Clear();
             }
+            //SimGameState.logger.LogError($"RTC gen System: {system.Name}");
             List<StarSystem> AllSystems = new List<StarSystem>();
             foreach (StarSystem addsystem in __instance.StarSystems)
             {
@@ -166,6 +215,7 @@ namespace PersistentMapClient
                     PersistentMapClient.Logger.LogError(e);
                     yield break;
                 }
+                //SimGameState.logger.LogError($"RTC gen Real System: {system.Name}");
                 var difficultyRange = AccessTools.Method(typeof(SimGameState), "GetContractRangeDifficultyRange").Invoke(__instance, new object[] { system, __instance.SimGameMode, __instance.GlobalDifficulty });
                 Dictionary<int, List<ContractOverride>> potentialContracts = (Dictionary<int, List<ContractOverride>>)AccessTools.Method(typeof(SimGameState), "GetSinglePlayerProceduralContractOverrides").Invoke(__instance, new object[] { difficultyRange });
                 WeightedList<MapAndEncounters> playableMaps = MetadataDatabase.Instance.GetReleasedMapsAndEncountersBySinglePlayerProceduralContractTypeAndTags(system.Def.MapRequiredTags, system.Def.MapExcludedTags, system.Def.SupportedBiomes, true).ToWeightedList(WeightedListType.SimpleRandom);
@@ -184,8 +234,30 @@ namespace PersistentMapClient
                 debugCount++;
                 IEnumerable<int> mapWeights = from map in playableMaps
                                               select map.Map.Weight;
+                /*SimGameState.logger.LogError($"potential contracts: {potentialContracts.Count}");
+                foreach (KeyValuePair<int, List<ContractOverride>> kVcontracts in potentialContracts)
+                {
+                    SimGameState.logger.LogError($"Key: {kVcontracts.Key}");
+                    foreach (ContractOverride contractOverride in kVcontracts.Value)
+                    {
+                        SimGameState.logger.LogError($"contract: {contractOverride.ID}");
+                    }
+                }*/
                 WeightedList<MapAndEncounters> activeMaps = new WeightedList<MapAndEncounters>(WeightedListType.WeightedRandom, playableMaps.ToList(), mapWeights.ToList<int>(), 0);
+               /* SimGameState.logger.LogError($"activeMaps before filter: {activeMaps.Count}");
+                foreach (MapAndEncounters mae in activeMaps.ToList())
+                {
+                    SimGameState.logger.LogError($"map: {mae.Map.FriendlyName}");
+                    SimGameState.logger.LogError($"encounters: {String.Join(", ", mae.EncounterFriendlyNames())}");
+                    List<string> contractTypes = new List<string>();
+                    foreach (EncounterLayer_MDD encounterLayerMDD in mae.Encounters)
+                    {
+                        contractTypes.Add(((int)encounterLayerMDD.ContractTypeRow.ContractTypeID).ToString());
+                    }
+                    SimGameState.logger.LogError($"encounter contract types: {String.Join(", ", contractTypes)}");
+                }*/
                 AccessTools.Method(typeof(SimGameState), "FilterActiveMaps").Invoke(__instance, new object[] { activeMaps, contractList });
+                //SimGameState.logger.LogError($"activeMaps after filter: {activeMaps.Count}");
                 activeMaps.Reset(false);
                 MapAndEncounters level = activeMaps.GetNext(false);
                 var MapEncounterContractData = AccessTools.Method(typeof(SimGameState), "FillMapEncounterContractData").Invoke(__instance, new object[] { system, difficultyRange, potentialContracts, validParticipants, level });
