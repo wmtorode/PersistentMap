@@ -42,6 +42,7 @@
     <Compile Include="HolderClasses.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PersistentMapClient.cs" />
+    <Compile Include="Util\ContractGenCallback.cs" />
     <Compile Include="Util\Helper.cs" />
     <Compile Include="Util\Logger.cs" />
     <Compile Include="Util\ReflectionHelper.cs" />
