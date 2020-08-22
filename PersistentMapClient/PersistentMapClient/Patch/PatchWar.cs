@@ -89,6 +89,9 @@ namespace PersistentMapClient {
                 __instance.RoomManager.RefreshDisplay();
                 AccessTools.Method(typeof(SimGameState), "OnNewQuarterBegin")
                     .Invoke(__instance, new object[] { });
+
+                __instance.CurSystem.ResetContracts();
+                //__instance.CurSystem.GenerateInitialContracts();
                 return false;
             }
             catch (Exception e) {
