@@ -11,8 +11,11 @@ namespace PersistentMapAPI {
         public int planetSupport;
         public int mCount;
         public string missionType;
+        public int rtState;
+        public string rtKey;
+        public int cbCount;
 
-        public MissionResult(FactionValue employer, FactionValue target, BattleTech.MissionResult result, string systemName, int difficulty, int awardedRep, int planetSupport, int mCount, string missionType) {
+        public MissionResult(FactionValue employer, FactionValue target, BattleTech.MissionResult result, string systemName, int difficulty, int awardedRep, int planetSupport, int mCount, string missionType, int cbCount, int state, string key) {
             this.awardedRep = awardedRep;
             this.difficulty = difficulty;
             this.employer = employer.Name;
@@ -22,6 +25,9 @@ namespace PersistentMapAPI {
             this.planetSupport = planetSupport;
             this.mCount = mCount;
             this.missionType = missionType;
+            this.cbCount = cbCount;
+            this.rtState = state;
+            this.rtKey = key;
         }
 
         public MissionResult() {

@@ -239,23 +239,30 @@ namespace PersistentMapClient {
 
         public static StarSystem ChangeWarDescription(StarSystem system, SimGameState Sim, PersistentMapAPI.System warsystem) {
             try {
-                if (IsBorder(system, Sim)) {
+                //if (IsBorder(system, Sim)) {
                     List<string> factionList = new List<string>();
-                    factionList.Add("Current Control:");
+                    if (!Fields.FluffDescriptions.ContainsKey(system.Name))
+                    {
+                        Fields.FluffDescriptions.Add(system.Name, system.Def.Description.Details);
+                    }
+                    if (warsystem.insurrect)
+                    {
+                    factionList.Add("<b><color=#de0202>System is Insurrect</color></b>\n");
+                    }
+                    factionList.Add(Fields.FluffDescriptions[system.Name]);
+                    factionList.Add("\nCurrent Control:");
                     foreach (FactionControl fc in warsystem.factions) {
                         if (fc.control != 0) {
                             factionList.Add(GetFactionName(fc.Name) + $": Companies: {fc.ActivePlayers}, Control: {fc.control}%");
                         }
                     }
-                    if (!Fields.FluffDescriptions.ContainsKey(system.Name)) {
-                        Fields.FluffDescriptions.Add(system.Name, system.Def.Description.Details);
-                    }
+                    
                     AccessTools.Method(typeof(DescriptionDef), "set_Details").Invoke(system.Def.Description, new object[] { string.Join("\n", factionList.ToArray()) });
-                }
-                else if (Fields.FluffDescriptions.ContainsKey(system.Name)) {
-                    AccessTools.Method(typeof(DescriptionDef), "set_Details").Invoke(system.Def.Description, new object[] { Fields.FluffDescriptions[system.Name] });
-                    Fields.FluffDescriptions.Remove(system.Name);
-                }
+                //}
+                //else if (Fields.FluffDescriptions.ContainsKey(system.Name)) {
+                //    AccessTools.Method(typeof(DescriptionDef), "set_Details").Invoke(system.Def.Description, new object[] { Fields.FluffDescriptions[system.Name] });
+                //    Fields.FluffDescriptions.Remove(system.Name);
+                //}
                 return system;
             }
             catch (Exception ex) {

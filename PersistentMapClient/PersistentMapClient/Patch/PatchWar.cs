@@ -14,6 +14,7 @@ using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using RtCore;
 
 namespace PersistentMapClient {
 
@@ -419,7 +420,8 @@ namespace PersistentMapClient {
                                 float num10 = (float)__instance.GetBaseReputationValue(game.Simulation.Constants);
                                 float num11 = num8 + num9 + num10;
                                 int repchange = Mathf.RoundToInt(num11);
-                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name);
+                                int cbills = PersistentMapClient.companyStats.GetValue<int>("Funds");
+                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name, cbills, RTCore.RtState, RTCore.RtKey);
                                 string errorText = "No Error";
                                 bool postSuccessfull = Web.PostMissionResult(mresult, game.Simulation.Player1sMercUnitHeraldryDef.Description.Name, out errorText);
                                 if (!postSuccessfull) {
@@ -496,6 +498,7 @@ namespace PersistentMapClient {
                             numberOfContracts = Fields.settings.priorityContractsPerAlly;
                         }
                         if (numberOfContracts > 0) {
+                            PersistentMapClient.Logger.Log($"Looking to generate Priority contracts for faction: {faction.Name}");
                             List<PersistentMapAPI.System> targets = new List<PersistentMapAPI.System>();
                             if (Fields.currentMap != null) {
                                 foreach (PersistentMapAPI.System potentialTarget in Fields.currentMap.starsystems) {
@@ -538,6 +541,7 @@ namespace PersistentMapClient {
                                                 contract.Override.salvagePotential = Mathf.Min(maxPriority, Mathf.RoundToInt(contract.Override.salvagePotential * Fields.settings.priorityContactPayPercentage));
                                                 contract.Override.negotiatedSalvage = 1f;
                                                 __instance.Sim.GlobalContracts.Add(contract);
+                                                PersistentMapClient.Logger.Log($"Generated Priorty Contract on {realSystem.Name}, targeting: {target.Name}");
                                             }
                                             else {
                                                 PersistentMapClient.Logger.Log("Prio contract is null");
@@ -545,6 +549,14 @@ namespace PersistentMapClient {
                                         }
                                     }
                                 }
+                                else
+                                {
+                                    PersistentMapClient.Logger.Log("Found no targets for priority contracts");
+                                }
+                            }
+                            else 
+                            {
+                                PersistentMapClient.Logger.Log("Star map is null, cannot make priority contracts!");
                             }
                         }
                     }
