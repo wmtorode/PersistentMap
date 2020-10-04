@@ -82,10 +82,11 @@ namespace PersistentMapClient {
 
         // Send any salvage the user didn't want to the faction inventory
         public static bool PostUnusedSalvage(List<SalvageDef> ___finalPotentialSalvage, FactionValue faction) {
-            List<ShopDefItem> items = new List<ShopDefItem>();
+            List<ShopItem> items = new List<ShopItem>();
             foreach (SalvageDef salvage in ___finalPotentialSalvage) {
-                ShopDefItem item = new ShopDefItem();
+                ShopItem item = new ShopItem();
                 item.ID = salvage.Description.Id;
+                item.UiName = salvage.Description.UIName;
                 switch (salvage.ComponentType) {
                     case ComponentType.AmmunitionBox: {
                             item.Type = ShopItemType.AmmunitionBox;
@@ -112,7 +113,6 @@ namespace PersistentMapClient {
                             break;
                         }
                 }
-                item.DiscountModifier = 1f;
                 item.Count = 1;
                 items.Add(item);
             }
@@ -129,8 +129,55 @@ namespace PersistentMapClient {
         }
 
         // Anything the user sells goes into faction inventory as well.
-        public static bool PostSoldItems(Dictionary<string, ShopDefItem> items, FactionValue faction) {
-            string testjson = JsonConvert.SerializeObject(items.Values.ToList<ShopDefItem>());
+        public static bool PostSoldItems(Dictionary<string, ShopDefItem> soldItems, FactionValue faction) {
+            List<ShopItem> items = new List<ShopItem>();
+            foreach (ShopDefItem soldItem in soldItems.Values.ToList<ShopDefItem>())
+            {
+                SalvageDef salvage = new SalvageDef();
+                soldItem.ToSalvageDef(ref salvage);
+                if (salvage != null)
+                {
+                    ShopItem item = new ShopItem();
+                    item.ID = salvage.Description.Id;
+                    item.UiName = salvage.Description.UIName;
+                    switch (salvage.ComponentType)
+                    {
+                        case ComponentType.AmmunitionBox:
+                            {
+                                item.Type = ShopItemType.AmmunitionBox;
+                                break;
+                            }
+                        case ComponentType.HeatSink:
+                            {
+                                item.Type = ShopItemType.HeatSink;
+                                break;
+                            }
+                        case ComponentType.JumpJet:
+                            {
+                                item.Type = ShopItemType.JumpJet;
+                                break;
+                            }
+                        case ComponentType.MechPart:
+                            {
+                                item.Type = ShopItemType.MechPart;
+                                break;
+                            }
+                        case ComponentType.Upgrade:
+                            {
+                                item.Type = ShopItemType.Upgrade;
+                                break;
+                            }
+                        case ComponentType.Weapon:
+                            {
+                                item.Type = ShopItemType.Weapon;
+                                break;
+                            }
+                    }
+                    item.Count = 1;
+                    items.Add(item);
+                }
+            }
+            string testjson = JsonConvert.SerializeObject(items);
             HttpWebRequest request = new RequestBuilder(WarService.PostSoldItems).Faction(faction).PostData(testjson).Build();
             HttpWebResponse response = request.GetResponse() as HttpWebResponse;
             using (Stream responseStream = response.GetResponseStream())
