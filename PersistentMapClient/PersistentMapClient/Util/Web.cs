@@ -26,6 +26,8 @@ namespace PersistentMapClient {
         private static ServerSettings serverSettings = new ServerSettings();
         private static DateTime nextRefresh = DateTime.UtcNow;
 
+        public static string postUrl = "api/roguewarservices/postmissionresult";
+
         public static bool CanPostSoldItems()
         {
             RefreshServerSettings();
@@ -349,7 +351,7 @@ namespace PersistentMapClient {
                         _requestMethod = "POST";
                         break;
                     case WarService.PostMissionResult:
-                        _requestUrl = $"{Fields.settings.ServerURL}api/roguewarservices/postmissionresult";
+                        _requestUrl = $"{Fields.settings.ServerURL}{Web.postUrl}";
                         _requestMethod = "POST";
                         break;
                     case WarService.PostSalvage:
@@ -388,6 +390,7 @@ namespace PersistentMapClient {
                 request.Timeout = 30000; // 30s connection timeout
                 string clientId = PersistentMapClient.getClientPostId();
                 request.Headers["X-RT-CLIENT"] =  clientId;
+                request.Headers["X-RT-CLIENT-VERSION"] = PersistentMapClient.ClientVersion;
 
                 if (_postJSON != null) {
                     // TODO: Why are we ASCII encoding instead of UTF-8?

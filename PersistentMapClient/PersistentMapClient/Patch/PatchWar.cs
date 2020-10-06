@@ -149,6 +149,134 @@ namespace PersistentMapClient {
         }
     }
 
+    [HarmonyPatch(typeof(CombatDebugHUD), "DEBUG_KillTarget")]
+    public static class CombatDebugHUD_DEBUG_KillTarget_Patch
+    {
+        static void Postfix()
+        {
+            try
+            {
+                Fields.skipmission = true;
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(CombatDebugHUD), "DEBUG_KillAllEnemies")]
+    public static class CombatDebugHUD_DEBUG_KillAllEnemies_Patch
+    {
+        static void Postfix()
+        {
+            try
+            {
+                Fields.skipmission = true;
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(CombatDebugHUD), "SetGodMode")]
+    public static class CombatDebugHUD_SetGodMode_Patch
+    {
+        static void Postfix()
+        {
+            try
+            {
+                Fields.skipmission = true;
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(CombatDebugHUD), "DEBUG_DamageTarget")]
+    public static class CombatDebugHUD_DEBUG_DamageTarget_Patch
+    {
+        static void Postfix()
+        {
+            try
+            {
+                Fields.skipmission = true;
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(CombatDebugHUD), "DEBUG_CritTarget")]
+    public static class CombatDebugHUD_DEBUG_CritTarget_Patch
+    {
+        static void Postfix()
+        {
+            try
+            {
+                Fields.skipmission = true;
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(CombatDebugHUD), "DEBUG_ApplyInstability")]
+    public static class CombatDebugHUD_DEBUG_ApplyInstability_Patch
+    {
+        static void Postfix()
+        {
+            try
+            {
+                Fields.skipmission = true;
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(CombatDebugHUD), "DEBUG_KnockdownTarget")]
+    public static class CombatDebugHUDDEBUG_KnockdownTarget_Patch
+    {
+        static void Postfix()
+        {
+            try
+            {
+                Fields.skipmission = true;
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(CombatDebugHUD), "DEBUG_OverheatTarget")]
+    public static class CombatDebugHUD_DEBUG_OverheatTarget_Patch
+    {
+        static void Postfix()
+        {
+            try
+            {
+                Fields.skipmission = true;
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(StarSystem), "ResetContracts")]
     public static class StarSystem_ResetContracts_Patch {
         static void Postfix(StarSystem __instance) {
@@ -421,7 +549,7 @@ namespace PersistentMapClient {
                                 float num11 = num8 + num9 + num10;
                                 int repchange = Mathf.RoundToInt(num11);
                                 int cbills = PersistentMapClient.companyStats.GetValue<int>("Funds");
-                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name, cbills, RTCore.RtState, RTCore.RtKey);
+                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name, cbills, RTCore.RtState, RTCore.RtKey, RTCore.rtSalt, RTCore.rtData);
                                 string errorText = "No Error";
                                 bool postSuccessfull = Web.PostMissionResult(mresult, game.Simulation.Player1sMercUnitHeraldryDef.Description.Name, out errorText);
                                 if (!postSuccessfull) {
@@ -517,9 +645,10 @@ namespace PersistentMapClient {
                                             if (faction == target || Fields.excludedFactions.Contains(target.Name)) {
                                                 List<FactionControl> ownerlist = targets[i].factions.OrderByDescending(x => x.control).ToList();
                                                 if (ownerlist.Count > 1) {
+                                                    // if an excluded faction owns the world, its probably abandoned
                                                     target = FactionEnumeration.GetFactionByName(ownerlist[1].Name);
-                                                    if (Fields.excludedFactions.Contains(target.Name)) {
-                                                        target = FactionEnumeration.GetAuriganPiratesFactionValue();
+                                                    if (Fields.excludedFactions.Contains(target.Name) || __instance.Sim.IsFactionAlly(faction, null)) {
+                                                        target = FactionEnumeration.GetFactionByName("Locals");
                                                     }
                                                 }
                                                 else {
