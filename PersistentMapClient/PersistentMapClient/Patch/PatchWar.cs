@@ -501,7 +501,8 @@ namespace PersistentMapClient {
                 else {
                     Fields.firstpass = false;
                 }
-                //PersistentMapClient.shop.RefreshShop();
+                // refresh shop because after save load the shop may reload before we know the client's id
+                PersistentMapClient.shop.RefreshShop();
             }
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);
@@ -549,7 +550,7 @@ namespace PersistentMapClient {
                                 float num11 = num8 + num9 + num10;
                                 int repchange = Mathf.RoundToInt(num11);
                                 int cbills = PersistentMapClient.companyStats.GetValue<int>("Funds");
-                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name, cbills, RTCore.RtState, RTCore.RtKey, RTCore.rtSalt, RTCore.rtData);
+                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name, cbills, RTCore.RtState, RTCore.RtKey, RTCore.rtSalt, RTCore.rtData, game.Simulation.GetClampedCareerModeDifficultyMod());
                                 string errorText = "No Error";
                                 bool postSuccessfull = Web.PostMissionResult(mresult, game.Simulation.Player1sMercUnitHeraldryDef.Description.Name, out errorText);
                                 if (!postSuccessfull) {
