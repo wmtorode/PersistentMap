@@ -647,7 +647,7 @@ namespace PersistentMapClient {
                                                 if (ownerlist.Count > 1) {
                                                     // if an excluded faction owns the world, its probably abandoned
                                                     target = FactionEnumeration.GetFactionByName(ownerlist[1].Name);
-                                                    if (Fields.excludedFactions.Contains(target.Name) || __instance.Sim.IsFactionAlly(faction, null)) {
+                                                    if (Fields.excludedFactions.Contains(target.Name) || __instance.Sim.IsFactionAlly(target, null)) {
                                                         target = FactionEnumeration.GetFactionByName("Locals");
                                                     }
                                                 }

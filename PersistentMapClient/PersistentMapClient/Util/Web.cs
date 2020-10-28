@@ -289,7 +289,16 @@ namespace PersistentMapClient {
                         errorText = "Cooldown is in affect, results not posted";
                         break;
                     case HttpStatusCode.PreconditionFailed:
-                        errorText = "Running multiple saves on a single career is not allowed, if you are rolling back a save (because of a crash or the like) you will need to wait serveral hours for cooldown to expire before you can continue posting results";
+                        HttpWebResponse response = (HttpWebResponse)e.Response;
+                        string cooldown = "";
+                        using (Stream responseStream = response.GetResponseStream())
+                        {
+                            StreamReader reader = new StreamReader(responseStream);
+                            string errDat = reader.ReadToEnd();
+                            Dictionary<string, string> errDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(errDat);
+                            cooldown = errDict["Lockout"];
+                        }
+                        errorText = $"Running multiple saves on a single career is not allowed, if you are rolling back a save (because of a crash or the like) you will need to wait {cooldown} for cooldown to expire before you can continue posting results";
                         break;
                     case HttpStatusCode.RequestedRangeNotSatisfiable:
                         errorText = "Client transmission error, could not determine star system";
