@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 
 namespace PersistentMapClient {
 
@@ -496,6 +497,24 @@ namespace PersistentMapClient {
             ContractType.AttackDefend,
             ContractType.ThreeWayBattle
         };
+
+        public static float GetCareerModifier(SimGameDifficulty simGameDifficulty)
+        {
+            float ret = 0.0f;
+            foreach(SimGameDifficulty.DifficultySetting difficultySetting in simGameDifficulty.GetSettings())
+            {
+                if (difficultySetting.Enabled)
+                {
+                    int idx = simGameDifficulty.GetCurSettingIndex(difficultySetting.ID);
+                    ret += difficultySetting.Options[idx].CareerScoreModifier;
+                }
+            }
+
+            PersistentMapClient.Logger.Log($"Unclamped Career Modifier is: {ret}");
+            ret = Mathf.Clamp(ret, 0.01f, 1.5f);
+            PersistentMapClient.Logger.Log($"Clamped Career Modifier is: {ret}");
+            return ret;
+        }
 
         public static Contract GetNewWarContract(SimGameState Sim, int Difficulty, FactionValue emp, FactionValue targ, FactionValue third, StarSystem system) {
             Fields.prioGen = true;
