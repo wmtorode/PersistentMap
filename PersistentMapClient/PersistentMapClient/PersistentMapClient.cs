@@ -14,7 +14,8 @@ namespace PersistentMapClient {
         public static readonly string CAREER_ID_STAT = "Pm_CareerId";
         public static readonly string MISSION_COUNT_STAT = "Pm_SuccessfulPostCount";
         public static readonly string SEASON_STAT = "Pm_PlaySeasonNumber";
-        public const string ClientVersion = "4.0.0-4";
+        public static readonly string CONSOLE_COUNT = "Pm_ConsoleCount";
+        public const string ClientVersion = "4.0.0-5";
 
         internal static Logger Logger;
         internal static string ModDirectory;
@@ -78,6 +79,7 @@ namespace PersistentMapClient {
             }
             if (!companyStats.ContainsStatistic(SEASON_STAT)) { companyStats.AddStatistic(SEASON_STAT, Fields.settings.Season); };
             if (!companyStats.ContainsStatistic(MISSION_COUNT_STAT)) { companyStats.AddStatistic(MISSION_COUNT_STAT, 0); };
+            if (!companyStats.ContainsStatistic(CONSOLE_COUNT)) { companyStats.AddStatistic(CONSOLE_COUNT, 0); };
 
             Logger.Log($"Career ID Loaded: {companyStats.GetValue<string>(CAREER_ID_STAT)}");
         }
@@ -102,6 +104,15 @@ namespace PersistentMapClient {
             return companyStats.GetValue<int>(MISSION_COUNT_STAT);
         }
 
+        public static int getConsoleCount()
+        {
+            if (companyStats == null)
+            {
+                return 0;
+            }
+            return companyStats.GetValue<int>(CONSOLE_COUNT);
+        }
+
         public static void incrementMissionCount()
         {
             if (companyStats != null)
@@ -109,6 +120,16 @@ namespace PersistentMapClient {
                 int currentValue = companyStats.GetValue<int>(MISSION_COUNT_STAT);
                 currentValue++;
                 companyStats.Set<int>(MISSION_COUNT_STAT, currentValue);
+            }
+        }
+
+        public static void incrementConsoleCount()
+        {
+            if (companyStats != null)
+            {
+                int currentValue = companyStats.GetValue<int>(CONSOLE_COUNT);
+                currentValue++;
+                companyStats.Set<int>(CONSOLE_COUNT, currentValue);
             }
         }
     }

@@ -31,18 +31,13 @@ namespace PersistentMapClient {
         static void Postfix() {
             try {
                 if (Fields.currentShopOwner != FactionEnumeration.GetInvalidUnsetFactionValue() && PersistentMapClient.shop.Exists) {
-                    Web.PostBuyItems(Fields.shopItemsSold, Fields.currentShopOwner);
+                    
                     if(Fields.shopItemsPosted.Count() > 0)
                     {
                         Web.PostSoldItems(Fields.shopItemsPosted, Fields.currentShopOwner);
                         Fields.shopItemsPosted = new Dictionary<string, ShopDefItem>();
                         PersistentMapClient.shop.needsRefresh = true;
                     }
-                    if (Fields.shopItemsSold.Count() > 0)
-                    {
-                        PersistentMapClient.shop.needsRefresh = true;
-                    }
-                    Fields.shopItemsSold = new Dictionary<string, PersistentMapAPI.PurchasedItem>();
                     
                 }
             }

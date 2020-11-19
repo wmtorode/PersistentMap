@@ -149,8 +149,9 @@ namespace PersistentMapClient.shops
             return item.DiscountModifier;
         }
 
-        public void Purshase(ShopDefItem item, int quantity)
+        public bool Purshase(ShopDefItem item, int quantity)
         {
+            bool ret = true;
             Fields.currentShopOwner = RelatedFaction;
             if (!Fields.shopItemsSold.ContainsKey(item.ID))
             {
@@ -163,7 +164,19 @@ namespace PersistentMapClient.shops
             {
                 Fields.shopItemsSold[item.ID].Count += quantity;
             }
-            UIControler.DefaultPurshase(this, item, quantity);
+            try
+            {
+                Web.PostBuyItems(Fields.shopItemsSold, RelatedFaction);
+                UIControler.DefaultPurshase(this, item, quantity);
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+                ret = false;
+            }
+            Fields.shopItemsSold = new Dictionary<string, PersistentMapAPI.PurchasedItem>();
+            needsRefresh = true;
+            return ret;
         }
 
         public bool OnSellItem(ShopDefItem item, int num)

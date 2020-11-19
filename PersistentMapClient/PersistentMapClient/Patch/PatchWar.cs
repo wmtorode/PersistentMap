@@ -130,6 +130,7 @@ namespace PersistentMapClient {
                     interruptQueue.QueueGenericPopup_NonImmediate("Save Edited!", "You have edited your save file in a way that disqualifies you from the war game, your missions wont be influenceing the war. All other fucntions work as normally.", true);
 
                 }
+                PersistentMapClient.incrementConsoleCount();
             }
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);
@@ -142,6 +143,7 @@ namespace PersistentMapClient {
         static void Postfix() {
             try {
                 Fields.skipmission = true;
+                PersistentMapClient.incrementConsoleCount();
             }
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);
@@ -157,6 +159,7 @@ namespace PersistentMapClient {
             try
             {
                 Fields.skipmission = true;
+                PersistentMapClient.incrementConsoleCount();
             }
             catch (Exception e)
             {
@@ -173,6 +176,7 @@ namespace PersistentMapClient {
             try
             {
                 Fields.skipmission = true;
+                PersistentMapClient.incrementConsoleCount();
             }
             catch (Exception e)
             {
@@ -189,6 +193,7 @@ namespace PersistentMapClient {
             try
             {
                 Fields.skipmission = true;
+                PersistentMapClient.incrementConsoleCount();
             }
             catch (Exception e)
             {
@@ -205,6 +210,7 @@ namespace PersistentMapClient {
             try
             {
                 Fields.skipmission = true;
+                PersistentMapClient.incrementConsoleCount();
             }
             catch (Exception e)
             {
@@ -221,6 +227,7 @@ namespace PersistentMapClient {
             try
             {
                 Fields.skipmission = true;
+                PersistentMapClient.incrementConsoleCount();
             }
             catch (Exception e)
             {
@@ -237,6 +244,7 @@ namespace PersistentMapClient {
             try
             {
                 Fields.skipmission = true;
+                PersistentMapClient.incrementConsoleCount();
             }
             catch (Exception e)
             {
@@ -253,6 +261,7 @@ namespace PersistentMapClient {
             try
             {
                 Fields.skipmission = true;
+                PersistentMapClient.incrementConsoleCount();
             }
             catch (Exception e)
             {
@@ -269,6 +278,7 @@ namespace PersistentMapClient {
             try
             {
                 Fields.skipmission = true;
+                PersistentMapClient.incrementConsoleCount();
             }
             catch (Exception e)
             {
@@ -550,7 +560,9 @@ namespace PersistentMapClient {
                                 float num11 = num8 + num9 + num10;
                                 int repchange = Mathf.RoundToInt(num11);
                                 int cbills = PersistentMapClient.companyStats.GetValue<int>("Funds");
-                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name, cbills, RTCore.RtState, RTCore.RtKey, RTCore.rtSalt, RTCore.rtData, Helper.GetCareerModifier(game.Simulation.DifficultySettings));
+                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, 
+                                    system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name, cbills, RTCore.RtState, RTCore.RtKey, 
+                                    RTCore.rtSalt, RTCore.rtData, Helper.GetCareerModifier(game.Simulation.DifficultySettings), PersistentMapClient.getConsoleCount());
                                 string errorText = "No Error";
                                 bool postSuccessfull = Web.PostMissionResult(mresult, game.Simulation.Player1sMercUnitHeraldryDef.Description.Name, out errorText);
                                 if (!postSuccessfull) {
