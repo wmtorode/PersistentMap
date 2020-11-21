@@ -13,7 +13,7 @@ using PersistentMapAPI;
 
 namespace PersistentMapClient.shops
 {
-    class OnlineShop: IShopDescriptor, IListShop, IFillWidgetFromFaction, ISpriteIcon, ICustomDiscount, IDefaultPrice, ICustomPurshase, ISellShop
+    class OnlineShop: IShopDescriptor, IListShop, IFillWidgetFromFaction, ISpriteIcon, ICustomDiscount, IDefaultPrice, ICustomPurshase, ISellShop, IForceRefresh
     {
         private int updateAfterMinutesElapsed = 15;
         private DateTime nextUpdate = DateTime.UtcNow;
