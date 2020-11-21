@@ -15,7 +15,7 @@ namespace PersistentMapClient {
         public static readonly string MISSION_COUNT_STAT = "Pm_SuccessfulPostCount";
         public static readonly string SEASON_STAT = "Pm_PlaySeasonNumber";
         public static readonly string CONSOLE_COUNT = "Pm_ConsoleCount";
-        public const string ClientVersion = "4.0.0-5";
+        public const string ClientVersion = "4.0.0-6";
 
         internal static Logger Logger;
         internal static string ModDirectory;
@@ -82,6 +82,8 @@ namespace PersistentMapClient {
             if (!companyStats.ContainsStatistic(CONSOLE_COUNT)) { companyStats.AddStatistic(CONSOLE_COUNT, 0); };
 
             Logger.Log($"Career ID Loaded: {companyStats.GetValue<string>(CAREER_ID_STAT)}");
+            Logger.Log($"Client issue Token: {RtCore.RTCore.rtData}");
+            Logger.Log($"Client Salt: {RtCore.RTCore.rtSalt}");
         }
 
         public static string getClientPostId()

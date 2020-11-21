@@ -549,10 +549,12 @@ namespace PersistentMapClient {
                         }
                         bool updated = false;
                         StarSystem system = game.Simulation.StarSystems.Find(x => x.ID == __instance.TargetSystem);
+                        bool bypassSupportReq = Web.canBypassSupport(__instance.Override.targetTeam.FactionValue.Name);
+                        bool isCapital = Helper.IsCapital(system, __instance.Override.employerTeam.faction);
                         foreach (StarSystem potential in game.Simulation.StarSystems) {
-                            if (Helper.IsCapital(system, __instance.Override.employerTeam.faction) || (!potential.Name.Equals(system.Name) &&
+                            if ((isCapital || (!potential.Name.Equals(system.Name) &&
                                 potential.OwnerValue == __instance.Override.employerTeam.FactionValue &&
-                                Helper.GetDistanceInLY(potential.Position.x, potential.Position.y, system.Position.x, system.Position.y) <= game.Simulation.Constants.Travel.MaxJumpDistance)) {
+                                Helper.GetDistanceInLY(potential.Position.x, potential.Position.y, system.Position.x, system.Position.y) <= game.Simulation.Constants.Travel.MaxJumpDistance)) || bypassSupportReq) {
                                 int planetSupport = Helper.CalculatePlanetSupport(game.Simulation, system, __instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue);
                                 float num8 = (float)__instance.GetNegotiableReputationBaseValue(game.Simulation.Constants) * __instance.PercentageContractReputation;
                                 float num9 = Convert.ToSingle(__instance.GameContext.GetObject(GameContextObjectTagEnum.ContractBonusEmployerReputation));

@@ -35,6 +35,11 @@ namespace PersistentMapClient {
             return serverSettings.CanPostSoldItems;
         }
 
+        public static bool canBypassSupport(string opfor)
+        {
+            return serverSettings.SupportBypass.Contains(opfor);
+        }
+
         private static void RefreshServerSettings()
         {
             if (DateTime.UtcNow > nextRefresh)
@@ -283,7 +288,7 @@ namespace PersistentMapClient {
                         errorText = "This career is from a not current season career and cannot particpate on the war map";
                         break;
                     case HttpStatusCode.Forbidden:
-                        errorText = "This career has been banned from particpating on the war map, contact a roguewar moderator or admin for additional details";
+                        errorText = "This career has been banned from particpating on the war map, contact a roguewar moderator or admin for additional details, If you believe this is in error you can appeal your ban by opening a Support Ticket on the main RogueTech Discord";
                         break;
                     case HttpStatusCode.ExpectationFailed:
                         errorText = "Cooldown is in affect, results not posted";
@@ -308,6 +313,15 @@ namespace PersistentMapClient {
                         break;
                     case (HttpStatusCode)418:
                         errorText = "Contract type has not be assigned a value, please contact roguewar admins";
+                        break;
+                    case (HttpStatusCode)444:
+                        errorText = "System is surrounded, no control change possible";
+                        break;
+                    case (HttpStatusCode)472:
+                        errorText = "Client is out of date, you must update RogueTech to continue participating on the map";
+                        break;
+                    case (HttpStatusCode)473:
+                        errorText = "Critical mission data not available, if you are Mac or Linux please file a support ticket on discord. If on Windows restart RogueTech";
                         break;
                     default:
                         errorText = "Unknown Error, your install may be out of date, if not make a discord ticket";

@@ -9,5 +9,6 @@ namespace PersistentMapAPI
     public class ServerSettings
     {
         public bool CanPostSoldItems = false;
+        public List<string> SupportBypass = new List<string>();
     }
 }
