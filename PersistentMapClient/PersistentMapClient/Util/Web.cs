@@ -35,9 +35,26 @@ namespace PersistentMapClient {
             return serverSettings.CanPostSoldItems;
         }
 
-        public static bool canBypassSupport(string opfor)
+        public static bool canBypassSupport(string opfor, SimGameState sim)
         {
-            return serverSettings.SupportBypass.Contains(opfor);
+            RefreshServerSettings();
+            bool isAllied = false;
+            foreach(FactionValue faction in FactionEnumeration.FactionList)
+            {
+                if(sim.IsFactionAlly(faction))
+                {
+                    isAllied = true;
+                    break;
+                }
+            }
+            if (!isAllied)
+            {
+                PersistentMapClient.Logger.Log($"No Allies, cannot bypass gain!");
+                return false;
+            }
+            bool ret = serverSettings.SupportBypass.Contains(opfor);
+            PersistentMapClient.Logger.Log($"Able to bypass gain reqs against opfor:{opfor} : {ret}");
+            return ret;
         }
 
         private static void RefreshServerSettings()
@@ -55,6 +72,13 @@ namespace PersistentMapClient {
                         StreamReader reader = new StreamReader(responseStream);
                         string itemsstring = reader.ReadToEnd();
                         serverSettings = JsonConvert.DeserializeObject<ServerSettings>(itemsstring);
+                        PersistentMapClient.Logger.Log($"----Refreshing client settings from server-------");
+                        PersistentMapClient.Logger.Log($"Can Post Sold {serverSettings.CanPostSoldItems}");
+                        PersistentMapClient.Logger.Log($"Bypass list");
+                        foreach (String fac in serverSettings.SupportBypass)
+                        {
+                            PersistentMapClient.Logger.Log($"Bypass is active for {fac}");
+                        }
                     }
                     nextRefresh = DateTime.UtcNow.AddMinutes(15);
                 }

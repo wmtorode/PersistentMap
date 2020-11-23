@@ -15,7 +15,7 @@ namespace PersistentMapClient {
         public static readonly string MISSION_COUNT_STAT = "Pm_SuccessfulPostCount";
         public static readonly string SEASON_STAT = "Pm_PlaySeasonNumber";
         public static readonly string CONSOLE_COUNT = "Pm_ConsoleCount";
-        public const string ClientVersion = "4.0.0-7";
+        public const string ClientVersion = "4.0.0-10";
 
         internal static Logger Logger;
         internal static string ModDirectory;
@@ -42,7 +42,7 @@ namespace PersistentMapClient {
                 Logger.Log($"Using default settings due to exception reading settings: {settingsE.Message}");
             }
 
-            
+            Logger.Log($"Starting Client: {ClientVersion}");
             Logger.LogIfDebug($"Settings are:({Fields.settings.ToString()})");
 
             /* Read the ClientID from a location that is persistent across installs. 

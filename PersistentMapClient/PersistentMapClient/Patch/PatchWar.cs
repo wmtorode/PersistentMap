@@ -536,7 +536,8 @@ namespace PersistentMapClient {
             try {
                 if (!__instance.IsFlashpointContract) {
                     GameInstance game = LazySingletonBehavior<UnityGameInstance>.Instance.Game;
-                    if (game.Simulation.IsFactionAlly(__instance.Override.employerTeam.FactionValue)) {
+                    bool bypassSupportReq = Web.canBypassSupport(__instance.Override.targetTeam.FactionValue.Name, game.Simulation);
+                    if (game.Simulation.IsFactionAlly(__instance.Override.employerTeam.FactionValue) || bypassSupportReq) {
                         if (Fields.cheater) {
                             PersistentMapClient.Logger.Log("cheated save, skipping war upload");
                             return;
@@ -549,7 +550,6 @@ namespace PersistentMapClient {
                         }
                         bool updated = false;
                         StarSystem system = game.Simulation.StarSystems.Find(x => x.ID == __instance.TargetSystem);
-                        bool bypassSupportReq = Web.canBypassSupport(__instance.Override.targetTeam.FactionValue.Name);
                         bool isCapital = Helper.IsCapital(system, __instance.Override.employerTeam.faction);
                         foreach (StarSystem potential in game.Simulation.StarSystems) {
                             if ((isCapital || (!potential.Name.Equals(system.Name) &&
