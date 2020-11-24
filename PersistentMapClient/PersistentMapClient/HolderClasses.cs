@@ -2,7 +2,7 @@
 using BattleTech.Framework;
 using System;
 using System.Collections.Generic;
-using PersistentMapAPI;
+using PersistentMapClient.Objects;
 
 namespace PersistentMapClient {
 
@@ -46,7 +46,7 @@ namespace PersistentMapClient {
         public static List<string> excludedFactions = new List<string>() { "AuriganMercenaries", "Betrayers", "MagistracyCentrella",
             "MajestyMetals", "MercenaryReviewBoard", "Nautilus", "NoFaction", "FlakJackals", "LocalsBrockwayRefugees",
             "SelfEmployed", "MasonsMarauders", "SteelBeast", "KellHounds", "RazorbackMercs", "HostileMercenaries" };
-        public static PersistentMapAPI.StarMap currentMap;
+        public static Objects.StarMap currentMap;
 
         public static FactionValue currentShopOwner;
         public static Dictionary<string, PurchasedItem> shopItemsSold = new Dictionary<string, PurchasedItem>();

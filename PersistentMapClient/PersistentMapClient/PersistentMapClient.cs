@@ -15,7 +15,7 @@ namespace PersistentMapClient {
         public static readonly string MISSION_COUNT_STAT = "Pm_SuccessfulPostCount";
         public static readonly string SEASON_STAT = "Pm_PlaySeasonNumber";
         public static readonly string CONSOLE_COUNT = "Pm_ConsoleCount";
-        public const string ClientVersion = "4.0.0-10";
+        public const string ClientVersion = "4.0.1-0";
 
         internal static Logger Logger;
         internal static string ModDirectory;

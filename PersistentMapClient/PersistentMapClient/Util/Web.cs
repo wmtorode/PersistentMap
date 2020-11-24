@@ -1,6 +1,6 @@
 ﻿using BattleTech;
 using Newtonsoft.Json;
-using PersistentMapAPI;
+using PersistentMapClient.Objects;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,6 +33,13 @@ namespace PersistentMapClient {
             RefreshServerSettings();
             PersistentMapClient.Logger.Log($"Can Post Sold {serverSettings.CanPostSoldItems}");
             return serverSettings.CanPostSoldItems;
+        }
+
+        public static bool canBypassSupport(FactionValue faction)
+        {
+            RefreshServerSettings();
+            return serverSettings.SupportBypass.Contains(faction.Name);
+
         }
 
         public static bool canBypassSupport(string opfor, SimGameState sim)
@@ -274,7 +281,7 @@ namespace PersistentMapClient {
         }
 
         // Send the results of a mission to the server
-        public static bool PostMissionResult(PersistentMapAPI.MissionResult mresult, string companyName, out string errorText) {
+        public static bool PostMissionResult(Objects.MissionResult mresult, string companyName, out string errorText) {
             errorText = "No Error";
             try {
                 string testjson = JsonConvert.SerializeObject(mresult);           

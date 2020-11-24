@@ -4,7 +4,7 @@ using BattleTech.Framework;
 using Harmony;
 using HBS.Collections;
 using Newtonsoft.Json;
-using PersistentMapAPI;
+using PersistentMapClient.Objects;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -238,7 +238,7 @@ namespace PersistentMapClient {
             }
         }
 
-        public static StarSystem ChangeWarDescription(StarSystem system, SimGameState Sim, PersistentMapAPI.System warsystem) {
+        public static StarSystem ChangeWarDescription(StarSystem system, SimGameState Sim, Objects.System warsystem) {
             try {
                 //if (IsBorder(system, Sim)) {
                     List<string> factionList = new List<string>();
@@ -282,7 +282,7 @@ namespace PersistentMapClient {
             }
         }
 
-        public static double GetDistanceInLY(StarSystem currPosition, PersistentMapAPI.System target, List<StarSystem> allSystems) {
+        public static double GetDistanceInLY(StarSystem currPosition, Objects.System target, List<StarSystem> allSystems) {
             try {
                 StarSystem targetSystem = allSystems.FirstOrDefault(x => x.Name.Equals(target.name));
                 return Math.Sqrt(Math.Pow(targetSystem.Position.x - currPosition.Position.x, 2) + Math.Pow(targetSystem.Position.y - currPosition.Position.y, 2));

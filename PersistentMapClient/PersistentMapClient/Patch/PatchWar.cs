@@ -5,8 +5,7 @@ using BattleTech.UI;
 using Harmony;
 using HBS;
 using Localize;
-using PersistentMapAPI;
-using PersistentMapAPI.Objects;
+using PersistentMapClient.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -389,7 +388,7 @@ namespace PersistentMapClient {
                 GameObject companyObject = GameObject.Find("COMPANYNAMES");
                 if (companyObject != null && Fields.currentMap != null) {
                     TextMeshProUGUI companietext = companyObject.transform.FindRecursive("txt-owner").GetComponent<TextMeshProUGUI>();
-                    PersistentMapAPI.System system = Fields.currentMap.starsystems.FirstOrDefault(x => x.name.Equals(___starSystem.Name));
+                    Objects.System system = Fields.currentMap.starsystems.FirstOrDefault(x => x.name.Equals(___starSystem.Name));
                     //if (system != null && companietext != null) {
                     //    List<string> companyNames = new List<string>();
                     //    foreach (Company company in system.companies) {
@@ -437,7 +436,7 @@ namespace PersistentMapClient {
                 List<string> changeNotifications = new List<string>();
                 List<StarSystem> transitiveContractUpdateTargets = new List<StarSystem>();
 
-                foreach (PersistentMapAPI.System system in Fields.currentMap.starsystems) {
+                foreach (Objects.System system in Fields.currentMap.starsystems) {
                     if (system == null) {
                         PersistentMapClient.Logger.Log("System in map null");
                     }
@@ -497,7 +496,7 @@ namespace PersistentMapClient {
                     fieldSetContractTargets.SetValue(changedSystem.Def, Helper.GetTargets(changedSystem, simGame));
 
                     // Update the description on these systems to show the new contract options
-                    PersistentMapAPI.System system = Fields.currentMap.starsystems.FirstOrDefault(x => x.name.Equals(changedSystem.Name));
+                    Objects.System system = Fields.currentMap.starsystems.FirstOrDefault(x => x.name.Equals(changedSystem.Name));
                     if (system != null) {
                         methodSetDescription.Invoke(changedSystem.Def,
                             new object[] { Helper.ChangeWarDescription(changedSystem, simGame, system).Def.Description });
@@ -520,7 +519,7 @@ namespace PersistentMapClient {
         }
 
         // Creates the argo marker for player activity
-        private static void AddActivePlayersBadgeToSystem(PersistentMapAPI.System system) {
+        private static void AddActivePlayersBadgeToSystem(Objects.System system) {
             GameObject starObject = GameObject.Find(system.name);
             Transform playerMarker = starObject.transform.Find("StarInner");
             Transform playerMarkerUnvisited = starObject.transform.Find("StarInnerUnvisited");
@@ -562,7 +561,7 @@ namespace PersistentMapClient {
                                 float num11 = num8 + num9 + num10;
                                 int repchange = Mathf.RoundToInt(num11);
                                 int cbills = PersistentMapClient.companyStats.GetValue<int>("Funds");
-                                PersistentMapAPI.MissionResult mresult = new PersistentMapAPI.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, 
+                                Objects.MissionResult mresult = new Objects.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, 
                                     system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name, cbills, RTCore.RtState, RTCore.RtKey, 
                                     RTCore.rtSalt, RTCore.rtData, Helper.GetCareerModifier(game.Simulation.DifficultySettings), PersistentMapClient.getConsoleCount());
                                 string errorText = "No Error";
@@ -642,9 +641,9 @@ namespace PersistentMapClient {
                         }
                         if (numberOfContracts > 0) {
                             PersistentMapClient.Logger.Log($"Looking to generate Priority contracts for faction: {faction.Name}");
-                            List<PersistentMapAPI.System> targets = new List<PersistentMapAPI.System>();
+                            List<Objects.System> targets = new List<Objects.System>();
                             if (Fields.currentMap != null) {
-                                foreach (PersistentMapAPI.System potentialTarget in Fields.currentMap.starsystems) {
+                                foreach (Objects.System potentialTarget in Fields.currentMap.starsystems) {
                                     FactionControl control = potentialTarget.factions.FirstOrDefault(x => x.Name == faction.Name);
                                     if (control != null && control.control < 100 && control.control != 0) {
                                         targets.Add(potentialTarget);
@@ -745,6 +744,16 @@ namespace PersistentMapClient {
                     targetsAlly = Fields.prioTarget;
                     if (HostileToAll != FactionEnumeration.GetInvalidUnsetFactionValue()) {
                         HostileToAll = Fields.prioThird;
+                    }
+                }
+                else
+                {
+                    if (Web.canBypassSupport(employer) && !Web.canBypassSupport(target))
+                    {
+                        PersistentMapClient.Logger.Log($"Employer is event faction, target is not, swapping: {employer}, {target}");
+                        FactionValue temp = employer;
+                        employer = target;
+                        target = temp;
                     }
                 }
             }

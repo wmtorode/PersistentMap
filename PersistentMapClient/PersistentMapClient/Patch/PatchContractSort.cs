@@ -13,9 +13,8 @@ namespace PersistentMapClient
         {
             try
             {
-                Settings settings = Helper.LoadSettings();
                 int difficulty = contract.Override.GetUIDifficulty();
-                if (settings.SortByRealDifficulty)
+                if (Fields.settings.SortByRealDifficulty)
                 {
                     difficulty = contract.Difficulty;
                 }

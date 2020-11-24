@@ -9,7 +9,7 @@ using PersistentMapClient;
 using BattleTech.UI;
 using HBS;
 using UnityEngine;
-using PersistentMapAPI;
+using PersistentMapClient.Objects;
 
 namespace PersistentMapClient.shops
 {
@@ -174,7 +174,7 @@ namespace PersistentMapClient.shops
                 PersistentMapClient.Logger.LogError(e);
                 ret = false;
             }
-            Fields.shopItemsSold = new Dictionary<string, PersistentMapAPI.PurchasedItem>();
+            Fields.shopItemsSold = new Dictionary<string, Objects.PurchasedItem>();
             needsRefresh = true;
             return ret;
         }
