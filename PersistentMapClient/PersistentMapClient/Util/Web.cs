@@ -21,6 +21,8 @@ namespace PersistentMapClient {
             PostSalvage,
             PostSoldItems,
             GetServerSettings,
+            GetBlackMarket,
+            PostBuyBlackMarketItem
         }
 
         private static ServerSettings serverSettings = new ServerSettings();
@@ -40,6 +42,25 @@ namespace PersistentMapClient {
             RefreshServerSettings();
             return serverSettings.SupportBypass.Contains(faction.Name);
 
+        }
+
+        public static bool BlackMarketAvailable(SimGameState sim)
+        {
+            RefreshServerSettings();
+            bool isAllied = false;
+            foreach (FactionValue faction in FactionEnumeration.FactionList)
+            {
+                if (sim.IsFactionAlly(faction))
+                {
+                    isAllied = true;
+                    break;
+                }
+            }
+            if(!isAllied)
+            {
+                return false;
+            }
+            return serverSettings.BlackMarketAvailable;
         }
 
         public static bool canBypassSupport(string opfor, SimGameState sim)
@@ -80,11 +101,12 @@ namespace PersistentMapClient {
                         string itemsstring = reader.ReadToEnd();
                         serverSettings = JsonConvert.DeserializeObject<ServerSettings>(itemsstring);
                         PersistentMapClient.Logger.Log($"----Refreshing client settings from server-------");
-                        PersistentMapClient.Logger.Log($"Can Post Sold {serverSettings.CanPostSoldItems}");
-                        PersistentMapClient.Logger.Log($"Bypass list");
+                        PersistentMapClient.Logger.Log($"Can Post Sold: {serverSettings.CanPostSoldItems}");
+                        PersistentMapClient.Logger.Log($"Online BlackMarkets Available: {serverSettings.BlackMarketAvailable}");
+                        PersistentMapClient.Logger.Log($"Bypass list:");
                         foreach (String fac in serverSettings.SupportBypass)
                         {
-                            PersistentMapClient.Logger.Log($"Bypass is active for {fac}");
+                            PersistentMapClient.Logger.Log($"Bypass is active for: {fac}");
                         }
                     }
                     nextRefresh = DateTime.UtcNow.AddMinutes(15);
@@ -98,10 +120,15 @@ namespace PersistentMapClient {
 
 
         // Pulls the inventory for the specified faction
-        public static List<ShopDefItem> GetShopForFaction(FactionValue faction) {
+        public static List<ShopDefItem> GetShopForFaction(FactionValue faction, bool blackMarket) {
             try {
 
-                HttpWebRequest request = new RequestBuilder(WarService.GetFactionShop).Faction(faction).Build();
+                WarService market = WarService.GetFactionShop;
+                if (blackMarket)
+                {
+                    market = WarService.GetBlackMarket;
+                }
+                HttpWebRequest request = new RequestBuilder(market).Faction(faction).Build();
                 HttpWebResponse response = request.GetResponse() as HttpWebResponse;
 
                 List<ShopDefItem> items;
@@ -227,7 +254,7 @@ namespace PersistentMapClient {
         }
 
         // Send a list of items to purchase from the faction store
-        public static bool PostBuyItems(Dictionary<string, PurchasedItem> sold, FactionValue owner) {
+        public static bool PostBuyItems(Dictionary<string, PurchasedItem> sold, FactionValue owner, bool blackMarket) {
             try {
                 if (sold == null || owner == null)
                 {
@@ -236,8 +263,13 @@ namespace PersistentMapClient {
                 }
                 if (sold.Count() > 0)
                 {
+                    WarService market = WarService.PostBuyItems;
+                    if (blackMarket)
+                    {
+                        market = WarService.PostBuyBlackMarketItem;
+                    }
                     string testjson = JsonConvert.SerializeObject(sold.Values.ToList<PurchasedItem>());
-                    HttpWebRequest request = new RequestBuilder(WarService.PostBuyItems).Faction(owner).PostData(testjson).Build();
+                    HttpWebRequest request = new RequestBuilder(market).Faction(owner).PostData(testjson).Build();
                     HttpWebResponse response = request.GetResponse() as HttpWebResponse;
                     using (Stream responseStream = response.GetResponseStream())
                     {
@@ -423,6 +455,14 @@ namespace PersistentMapClient {
                     case WarService.GetServerSettings:
                         _requestUrl = $"{Fields.settings.ServerURL}api/roguesettingservice/getsettings";
                         _requestMethod = "GET";
+                        break;
+                    case WarService.GetBlackMarket:
+                        _requestUrl = $"{Fields.settings.ServerURL}api/rogueshopservices/getblackmarketshop/{_faction}";
+                        _requestMethod = "GET";
+                        break;
+                    case WarService.PostBuyBlackMarketItem:
+                        _requestUrl = $"{Fields.settings.ServerURL}api/rogueshopservices/purchasefromblackmarketshop/{_faction}";
+                        _requestMethod = "POST";
                         break;
                     case WarService.GetStarMap:
                     default:

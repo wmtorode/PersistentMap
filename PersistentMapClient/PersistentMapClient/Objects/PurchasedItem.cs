@@ -10,5 +10,6 @@ namespace PersistentMapClient.Objects
     {
         public string ID;
         public int Count;
+        public int Cost = 0;
     }
 }

@@ -15,12 +15,13 @@ namespace PersistentMapClient {
         public static readonly string MISSION_COUNT_STAT = "Pm_SuccessfulPostCount";
         public static readonly string SEASON_STAT = "Pm_PlaySeasonNumber";
         public static readonly string CONSOLE_COUNT = "Pm_ConsoleCount";
-        public const string ClientVersion = "4.0.1-0";
+        public const string ClientVersion = "4.0.1-2";
 
         internal static Logger Logger;
         internal static string ModDirectory;
         internal static StatCollection companyStats;
         internal static OnlineShop shop;
+        internal static BlackMarketOnlineShop blackmarketShop;
 
         public static void Init(string directory, string settingsJSON) {
             ModDirectory = directory;
@@ -59,6 +60,8 @@ namespace PersistentMapClient {
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             shop = new OnlineShop();
             Control.RegisterShop(shop, new string[] {"systemchange", "ContractComplete", "OwnerChange" });
+            blackmarketShop = new BlackMarketOnlineShop();
+            Control.RegisterShop(blackmarketShop, new string[] { "systemchange", "ContractComplete", "OwnerChange" });
         }
 
         // Used for Unit Tests only

@@ -15,18 +15,20 @@ namespace PersistentMapClient.shops
 {
     class OnlineShop: IShopDescriptor, IListShop, IFillWidgetFromFaction, ISpriteIcon, ICustomDiscount, IDefaultPrice, ICustomPurshase, ISellShop, IForceRefresh
     {
-        private int updateAfterMinutesElapsed = 15;
-        private DateTime nextUpdate = DateTime.UtcNow;
+        protected int updateAfterMinutesElapsed = 15;
+        protected DateTime nextUpdate = DateTime.UtcNow;
         public bool needsRefresh = false;
         public int SellPriority => 1;
 
         public virtual FactionValue RelatedFaction => Control.State.CurrentSystem.OwnerValue;
 
+        public bool isBlackMarket = false;
+
         public int SortOrder => Control.Settings.FactionShopPriority;
         public bool RefreshOnSystemChange => true;
         public bool RefreshOnMonthChange => false;
         public bool RefreshOnOwnerChange => true;
-        public bool Exists
+        public virtual bool Exists
         {
             get
             {
@@ -44,12 +46,12 @@ namespace PersistentMapClient.shops
 
         public bool CanUse => Exists;
 
-        public string Name => "Online";
-        public string TabText => RelatedFaction == null ? "ERROR_FACTION" : RelatedFaction.Name + " Online";
+        public virtual string Name => "Online";
+        public virtual string TabText => RelatedFaction == null ? "ERROR_FACTION" : RelatedFaction.Name + " Online";
 
-        private List<ShopDefItem> inventory = new List<ShopDefItem>();
+        protected List<ShopDefItem> inventory = new List<ShopDefItem>();
 
-        public string ShopPanelImage
+        public virtual string ShopPanelImage
         {
             get
             {
@@ -102,7 +104,7 @@ namespace PersistentMapClient.shops
             }
         }
 
-        public void RefreshShop()
+        public virtual void RefreshShop()
         {
             if (!Control.State.Sim.IsFactionAlly(RelatedFaction))
             {
@@ -110,7 +112,7 @@ namespace PersistentMapClient.shops
             }
             else
             {
-                inventory = Web.GetShopForFaction(RelatedFaction);
+                inventory = Web.GetShopForFaction(RelatedFaction, isBlackMarket);
                 if (inventory == null)
                 {
                     inventory = new List<ShopDefItem>();
@@ -149,7 +151,7 @@ namespace PersistentMapClient.shops
             return item.DiscountModifier;
         }
 
-        public bool Purshase(ShopDefItem item, int quantity)
+        public virtual bool Purshase(ShopDefItem item, int quantity)
         {
             bool ret = true;
             Fields.currentShopOwner = RelatedFaction;
@@ -158,15 +160,17 @@ namespace PersistentMapClient.shops
                 PurchasedItem pItem = new PurchasedItem();
                 pItem.ID = item.ID;
                 pItem.Count = quantity;
+                pItem.Cost = UIControler.GetPrice(item) * quantity;
                 Fields.shopItemsSold.Add(item.ID, pItem);
             }
             else
             {
                 Fields.shopItemsSold[item.ID].Count += quantity;
+                Fields.shopItemsSold[item.ID].Cost += UIControler.GetPrice(item) * quantity;
             }
             try
             {
-                Web.PostBuyItems(Fields.shopItemsSold, RelatedFaction);
+                Web.PostBuyItems(Fields.shopItemsSold, RelatedFaction, isBlackMarket);
                 UIControler.DefaultPurshase(this, item, quantity);
             }
             catch (Exception e)

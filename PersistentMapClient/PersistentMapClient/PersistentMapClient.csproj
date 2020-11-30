@@ -47,6 +47,7 @@
     <Compile Include="Patch\PatchRandomTravelContracts.cs" />
     <Compile Include="Patch\PatchShop.cs" />
     <Compile Include="Patch\PatchWar.cs" />
+    <Compile Include="shops\BlackMarketOnlineShop.cs" />
     <Compile Include="shops\OnlineShop.cs" />
     <Compile Include="TransformExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

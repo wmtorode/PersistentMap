@@ -512,6 +512,7 @@ namespace PersistentMapClient {
                 }
                 // refresh shop because after save load the shop may reload before we know the client's id
                 PersistentMapClient.shop.RefreshShop();
+                PersistentMapClient.blackmarketShop.RefreshShop();
             }
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);
@@ -520,12 +521,20 @@ namespace PersistentMapClient {
 
         // Creates the argo marker for player activity
         private static void AddActivePlayersBadgeToSystem(Objects.System system) {
-            GameObject starObject = GameObject.Find(system.name);
-            Transform playerMarker = starObject.transform.Find("StarInner");
-            Transform playerMarkerUnvisited = starObject.transform.Find("StarInnerUnvisited");
-            // Only one of these will actually be active for a star system at any given time
-            playerMarker.localScale = new Vector3(Fields.settings.activePlayerMarkerSize, Fields.settings.activePlayerMarkerSize, Fields.settings.activePlayerMarkerSize);
-            playerMarkerUnvisited.localScale = new Vector3(Fields.settings.activePlayerMarkerSize, Fields.settings.activePlayerMarkerSize, Fields.settings.activePlayerMarkerSize);
+            try
+            {
+                GameObject starObject = GameObject.Find(system.name);
+                Transform playerMarker = starObject.transform.Find("StarInner");
+                Transform playerMarkerUnvisited = starObject.transform.Find("StarInnerUnvisited");
+                // Only one of these will actually be active for a star system at any given time
+                playerMarker.localScale = new Vector3(Fields.settings.activePlayerMarkerSize, Fields.settings.activePlayerMarkerSize, Fields.settings.activePlayerMarkerSize);
+                playerMarkerUnvisited.localScale = new Vector3(Fields.settings.activePlayerMarkerSize, Fields.settings.activePlayerMarkerSize, Fields.settings.activePlayerMarkerSize);
+            }
+            catch (Exception e)
+            {
+                //no clue why this would happen?
+                PersistentMapClient.Logger.LogError(e);
+            }
         }
     }
 
