@@ -47,7 +47,7 @@ namespace PersistentMapClient.shops
 
         public override void RefreshShop()
         {
-            if (Control.State.Sim.IsFactionAlly(RelatedFaction))
+            if (Control.State.Sim.IsFactionAlly(RelatedFaction) || !Web.BlackMarketAvailable(Control.State.Sim))
             {
                 inventory = new List<ShopDefItem>();
             }

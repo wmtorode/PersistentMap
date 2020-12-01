@@ -36,6 +36,7 @@
     <Compile Include="HolderClasses.cs" />
     <Compile Include="Objects\Company.cs" />
     <Compile Include="Objects\FactionControl.cs" />
+    <Compile Include="Objects\FactionRewardPopup.cs" />
     <Compile Include="Objects\MissionResult.cs" />
     <Compile Include="Objects\PurchasedItem.cs" />
     <Compile Include="Objects\ServerSettings.cs" />

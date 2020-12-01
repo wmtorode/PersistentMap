@@ -39,6 +39,7 @@ namespace PersistentMapClient {
         public static bool warmission = false;
         public static string ShopFileTag = "rt_economy";
         public static bool canPostSalvage = false;
+        public static bool testReward = false;
         public static int currBorderCons = 0;
         public static bool needsToReloadEnemies = false;
         public static List<string> immuneFromWar = new List<string>();
