@@ -515,6 +515,34 @@ namespace PersistentMapClient {
                 // refresh shop because after save load the shop may reload before we know the client's id
                 PersistentMapClient.shop.RefreshShop();
                 PersistentMapClient.blackmarketShop.RefreshShop();
+
+                HpgMail mail = Web.GetHpgMail();
+                SimGameInterruptManager mailQueue = (SimGameInterruptManager)fieldSimGameInterruptManager.GetValue(simGame);
+                if (!string.IsNullOrEmpty(mail.factionMessage) && mail.factionMessage != Fields.lastFactionMsg)
+                {
+                    Fields.lastFactionMsg = mail.factionMessage;
+                    mailQueue.QueueGenericPopup_NonImmediate("Priority HPG News", mail.factionMessage, true);
+                }
+                foreach(EventMessage message in mail.events)
+                {
+                    if (!Fields.usedEvents.Contains(message.id))
+                    {
+                        Fields.usedEvents.Add(message.id);
+                        mailQueue.QueueGenericPopup_NonImmediate("INN News", $"{message.text}\n\nHours Remaining:{message.remaining}", true);
+                    }
+                }
+                foreach (EventMessage message in mail.news)
+                {
+                    if (!Fields.usedNews.Contains(message.id))
+                    {
+                        Fields.usedNews.Add(message.id);
+                        mailQueue.QueueGenericPopup_NonImmediate("INN News", message.text, true);
+                    }
+                }
+                foreach (ClientReward reward in mail.rewards)
+                {
+                    Fields.rewards.Add(reward);
+                }
             }
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);
@@ -799,32 +827,53 @@ namespace PersistentMapClient {
     {
         public static void Postfix(SimGameState __instance)
         {
-            if (!Fields.testReward)
+            if (Fields.rewards.Count() > 0)
             {
-                try
+                SimGameInterruptManager mailQueue = __instance.InterruptQueue;
+                foreach (ClientReward reward in Fields.rewards)
                 {
-                    Fields.testReward = true;
-                    string testString = "itemcollection_random_bushwackerTest,,,\nmechdef_bushwacker_BSW-S2,Mech,1,10\nmechdef_bushwacker_BSW-X1,Mech,1,10\nmechdef_bushwacker_BSW-X2,Mech,1,10";
-                    MemoryStream stream = new MemoryStream();
-                    stream.Write(Encoding.UTF8.GetBytes(testString), 0, testString.Length);
-                    stream.Seek(0, SeekOrigin.Begin);
-                    CSVReader reader = new CSVReader(stream);
-                    ItemCollectionDef testCollection = new ItemCollectionDef();
-                    testCollection.FromCSV(reader);
-                    PersistentMapClient.Logger.Log($"Collection Entries: {testCollection.Entries.Count()}, weight override: {testCollection.HasWeightOverride}");
-                    foreach(ItemCollectionDef.Entry entry in testCollection.Entries)
+
+                    try
                     {
-                        PersistentMapClient.Logger.Log($"Entry Type: {entry.Type}");
+                        mailQueue.QueueGenericPopup_NonImmediate("War Reward", reward.rewardText, true);
+                        if (reward.cbills != 0)
+                        {
+                            __instance.AddFunds(reward.cbills, null, true);
+                        }
+                        if (!string.IsNullOrEmpty(reward.csvData))
+                        {
+                            MemoryStream stream = new MemoryStream();
+                            stream.Write(Encoding.UTF8.GetBytes(reward.csvData), 0, reward.csvData.Length);
+                            stream.Seek(0, SeekOrigin.Begin);
+                            CSVReader reader = new CSVReader(stream);
+                            ItemCollectionDef testCollection = new ItemCollectionDef();
+                            testCollection.FromCSV(reader);
+                            PersistentMapClient.Logger.Log($"Collection Entries: {testCollection.Entries.Count()}, weight override: {testCollection.HasWeightOverride}");
+                            foreach (ItemCollectionDef.Entry entry in testCollection.Entries)
+                            {
+                                PersistentMapClient.Logger.Log($"Entry Type: {entry.Type}");
+                            }
+                            stream.Dispose();
+                            Objects.FactionRewardPopup rewardPopup = new Objects.FactionRewardPopup(testCollection);
+                            rewardPopup.choices = reward.choices;
+                            mailQueue.AddInterrupt((SimGameInterruptManager.Entry)rewardPopup, true);
+                        }
                     }
-                    stream.Dispose();
-                    Objects.FactionRewardPopup rewardPopup = new Objects.FactionRewardPopup(testCollection);
-                    __instance.InterruptQueue.AddInterrupt((SimGameInterruptManager.Entry)rewardPopup, true);
-                }
-                catch (Exception e)
-                {
-                    PersistentMapClient.Logger.LogError(e);
+                    catch (Exception e)
+                    {
+                        PersistentMapClient.Logger.LogError(e);
+                    }
                 }
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(SimGameState), "_OnAttachUXComplete")]
+    class SimGameState_OnAttachUXComplete
+    {
+        public static void Postfix(SimGameState __instance)
+        {
+            __instance.InterruptQueue.DisplayIfAvailable();
         }
     }
 }

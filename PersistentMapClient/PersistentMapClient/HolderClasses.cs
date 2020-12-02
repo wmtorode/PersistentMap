@@ -52,6 +52,10 @@ namespace PersistentMapClient {
         public static FactionValue currentShopOwner;
         public static Dictionary<string, PurchasedItem> shopItemsSold = new Dictionary<string, PurchasedItem>();
         public static Dictionary<string, ShopDefItem> shopItemsPosted = new Dictionary<string, ShopDefItem>();
+        public static string lastFactionMsg = "";
+        public static List<int> usedEvents = new List<int>();
+        public static List<int> usedNews = new List<int>();
+        public static List<ClientReward> rewards = new List<ClientReward>();
 
 
         //prioFields

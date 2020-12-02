@@ -34,9 +34,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="HolderClasses.cs" />
+    <Compile Include="Objects\ClientReward.cs" />
     <Compile Include="Objects\Company.cs" />
+    <Compile Include="Objects\EventMessage.cs" />
     <Compile Include="Objects\FactionControl.cs" />
     <Compile Include="Objects\FactionRewardPopup.cs" />
+    <Compile Include="Objects\HpgMail.cs" />
     <Compile Include="Objects\MissionResult.cs" />
     <Compile Include="Objects\PurchasedItem.cs" />
     <Compile Include="Objects\ServerSettings.cs" />

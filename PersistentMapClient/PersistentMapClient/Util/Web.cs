@@ -22,7 +22,8 @@ namespace PersistentMapClient {
             PostSoldItems,
             GetServerSettings,
             GetBlackMarket,
-            PostBuyBlackMarketItem
+            PostBuyBlackMarketItem,
+            GetHpgMail
         }
 
         private static ServerSettings serverSettings = new ServerSettings();
@@ -85,9 +86,14 @@ namespace PersistentMapClient {
             return ret;
         }
 
-        private static void RefreshServerSettings()
+        public static void forceRefreshServerSettings()
         {
-            if (DateTime.UtcNow > nextRefresh)
+            RefreshServerSettings(true);
+        }
+
+        private static void RefreshServerSettings(bool force=false)
+        {
+            if (DateTime.UtcNow > nextRefresh || force)
             {
                 try
                 {
@@ -115,6 +121,31 @@ namespace PersistentMapClient {
                 {
                     PersistentMapClient.Logger.LogError(e);
                 }
+            }
+        }
+
+        // Pulls down messages from your faction, 
+        public static HpgMail GetHpgMail()
+        {
+            try
+            {
+
+                HttpWebRequest request = new RequestBuilder(WarService.GetHpgMail).Build();
+                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+
+                HpgMail mail = new HpgMail();
+                using (Stream responseStream = response.GetResponseStream())
+                {
+                    StreamReader reader = new StreamReader(responseStream);
+                    string jdata = reader.ReadToEnd();
+                    mail = JsonConvert.DeserializeObject<HpgMail>(jdata);
+                }
+                return mail;
+            }
+            catch (Exception e)
+            {
+                PersistentMapClient.Logger.LogError(e);
+                return new HpgMail();
             }
         }
 
@@ -463,6 +494,10 @@ namespace PersistentMapClient {
                     case WarService.PostBuyBlackMarketItem:
                         _requestUrl = $"{Fields.settings.ServerURL}api/rogueshopservices/purchasefromblackmarketshop/{_faction}";
                         _requestMethod = "POST";
+                        break;
+                    case WarService.GetHpgMail:
+                        _requestUrl = $"{Fields.settings.ServerURL}api/rogueevents/hpgmessages";
+                        _requestMethod = "GET";
                         break;
                     case WarService.GetStarMap:
                     default:
