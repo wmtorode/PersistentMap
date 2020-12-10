@@ -830,40 +830,39 @@ namespace PersistentMapClient {
             if (Fields.rewards.Count() > 0)
             {
                 SimGameInterruptManager mailQueue = __instance.InterruptQueue;
-                foreach (ClientReward reward in Fields.rewards)
-                {
 
-                    try
+                ClientReward reward = Fields.rewards[0];
+                try
+                {
+                    mailQueue.QueueGenericPopup_NonImmediate("War Reward", reward.rewardText, true);
+                    if (reward.cbills != 0)
                     {
-                        mailQueue.QueueGenericPopup_NonImmediate("War Reward", reward.rewardText, true);
-                        if (reward.cbills != 0)
-                        {
-                            __instance.AddFunds(reward.cbills, null, true);
-                        }
-                        if (!string.IsNullOrEmpty(reward.csvData))
-                        {
-                            MemoryStream stream = new MemoryStream();
-                            stream.Write(Encoding.UTF8.GetBytes(reward.csvData), 0, reward.csvData.Length);
-                            stream.Seek(0, SeekOrigin.Begin);
-                            CSVReader reader = new CSVReader(stream);
-                            ItemCollectionDef testCollection = new ItemCollectionDef();
-                            testCollection.FromCSV(reader);
-                            PersistentMapClient.Logger.Log($"Collection Entries: {testCollection.Entries.Count()}, weight override: {testCollection.HasWeightOverride}");
-                            foreach (ItemCollectionDef.Entry entry in testCollection.Entries)
-                            {
-                                PersistentMapClient.Logger.Log($"Entry Type: {entry.Type}");
-                            }
-                            stream.Dispose();
-                            Objects.FactionRewardPopup rewardPopup = new Objects.FactionRewardPopup(testCollection);
-                            rewardPopup.choices = reward.choices;
-                            mailQueue.AddInterrupt((SimGameInterruptManager.Entry)rewardPopup, true);
-                        }
+                        __instance.AddFunds(reward.cbills, null, true);
                     }
-                    catch (Exception e)
+                    if (!string.IsNullOrEmpty(reward.csvData))
                     {
-                        PersistentMapClient.Logger.LogError(e);
+                        MemoryStream stream = new MemoryStream();
+                        stream.Write(Encoding.UTF8.GetBytes(reward.csvData), 0, reward.csvData.Length);
+                        stream.Seek(0, SeekOrigin.Begin);
+                        CSVReader reader = new CSVReader(stream);
+                        ItemCollectionDef testCollection = new ItemCollectionDef();
+                        testCollection.FromCSV(reader);
+                        PersistentMapClient.Logger.Log($"Collection Entries: {testCollection.Entries.Count()}, weight override: {testCollection.HasWeightOverride}");
+                        foreach (ItemCollectionDef.Entry entry in testCollection.Entries)
+                        {
+                            PersistentMapClient.Logger.Log($"Entry Type: {entry.Type}");
+                        }
+                        stream.Dispose();
+                        Objects.FactionRewardPopup rewardPopup = new Objects.FactionRewardPopup(testCollection);
+                        rewardPopup.choices = reward.choices;
+                        mailQueue.AddInterrupt((SimGameInterruptManager.Entry)rewardPopup, true);
                     }
                 }
+                catch (Exception e)
+                {
+                    PersistentMapClient.Logger.LogError(e);
+                }
+                Fields.rewards.RemoveAt(0);
             }
         }
     }
