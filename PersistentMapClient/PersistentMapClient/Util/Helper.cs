@@ -250,7 +250,22 @@ namespace PersistentMapClient {
                     {
                     factionList.Add("<b><color=#de0202>System is Insurrect</color></b>\n");
                     }
-                    factionList.Add(Fields.FluffDescriptions[system.Name]);
+
+                    if (warsystem.markSystem)
+                    {
+                        factionList.Add("<b><color=#8904B1>Online event target</color></b>\n");
+                    }
+                    if (warsystem.generatesItems)
+                    {
+                        factionList.Add("<b><color=#088A08>Generates Items:</color></b>");
+                        foreach (string item in warsystem.itemsGenerated)
+                        {
+                            factionList.Add($"<b><color=#088A08>{item}</color></b>");
+                        }
+
+                        factionList.Add("\n");
+                    }
+                factionList.Add(Fields.FluffDescriptions[system.Name]);
                     factionList.Add("\nCurrent Control:");
                     foreach (FactionControl fc in warsystem.factions) {
                         if (fc.control != 0) {

@@ -11,6 +11,10 @@ namespace PersistentMapClient.Objects
         public string owner;
         public bool immuneFromWar;
         public bool insurrect;
+        public bool generatesItems = false;
+        public List<string> itemsGenerated = new List<string>();
+        public bool markSystem = false;
+
 
         public FactionControl FindFactionControlByFaction(string faction) {
             if(factions == null) {

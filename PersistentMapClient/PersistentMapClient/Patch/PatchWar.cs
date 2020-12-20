@@ -16,6 +16,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using RtCore;
+using ColourfulFlashPoints;
+using ColourfulFlashPoints.Data;
 
 namespace PersistentMapClient {
 
@@ -435,6 +437,7 @@ namespace PersistentMapClient {
                     return;
                 }
 
+                ColourfulFlashPoints.Main.clearMapMarkers();
                 List<string> changeNotifications = new List<string>();
                 List<StarSystem> transitiveContractUpdateTargets = new List<StarSystem>();
 
@@ -451,14 +454,21 @@ namespace PersistentMapClient {
                         }
                         //continue;
                     }
-                    if (system.Players > 0) {
-                       AddActivePlayersBadgeToSystem(system);
+
+                    if (system.Players > 0)
+                    {
+                        AddActivePlayersBadgeToSystem(system);
                     }
 
                     StarSystem system2 = simGame.StarSystems.Find(x => x.Name.Equals(system.name));
                     if (system2 != null) {
                         if (system2.Tags == null) {
                             PersistentMapClient.Logger.Log(system2.Name + ": Has no Tags");
+                        }
+                        if (system.markSystem)
+                        {
+                            MapMarker mapMarker = new MapMarker(system2.ID, Fields.settings.eventMarker);
+                            ColourfulFlashPoints.Main.addMapMarker(mapMarker);
                         }
                         FactionValue newOwner = FactionEnumeration.GetFactionByName(system.owner);
                         FactionValue oldOwner = system2.OwnerValue;
