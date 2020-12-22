@@ -15,7 +15,7 @@ namespace PersistentMapClient {
         public static readonly string MISSION_COUNT_STAT = "Pm_SuccessfulPostCount";
         public static readonly string SEASON_STAT = "Pm_PlaySeasonNumber";
         public static readonly string CONSOLE_COUNT = "Pm_ConsoleCount";
-        public const string ClientVersion = "4.0.2-2";
+        public const string ClientVersion = "4.0.2-4";
 
         internal static Logger Logger;
         internal static string ModDirectory;
@@ -69,16 +69,23 @@ namespace PersistentMapClient {
             Logger.Close();
         }
 
-        public static void setCompanyStats(StatCollection stats)
+        public static void setCompanyStats(StatCollection stats, bool init)
         {
             companyStats = stats;
 
 
             if (!companyStats.ContainsStatistic(CLIENT_ID_STAT)) { companyStats.AddStatistic(CLIENT_ID_STAT, Fields.settings.ClientID); };
-            if (!companyStats.ContainsStatistic(CAREER_ID_STAT)) 
+            if (!companyStats.ContainsStatistic(CAREER_ID_STAT) && init) 
             {
                 Guid careerId = Guid.NewGuid();
                 companyStats.AddStatistic(CAREER_ID_STAT, careerId.ToString()); 
+            }
+            else
+            {
+                if (!companyStats.ContainsStatistic(CAREER_ID_STAT))
+                {
+                    companyStats.AddStatistic(CAREER_ID_STAT, "");
+                }
             }
             if (!companyStats.ContainsStatistic(SEASON_STAT)) { companyStats.AddStatistic(SEASON_STAT, Fields.settings.Season); };
             if (!companyStats.ContainsStatistic(MISSION_COUNT_STAT)) { companyStats.AddStatistic(MISSION_COUNT_STAT, 0); };

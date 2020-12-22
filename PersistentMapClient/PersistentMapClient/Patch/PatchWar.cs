@@ -27,7 +27,7 @@ namespace PersistentMapClient {
     {
         public static void Postfix(SimGameState __instance)
         {
-            PersistentMapClient.setCompanyStats(__instance.CompanyStats);
+            PersistentMapClient.setCompanyStats(__instance.CompanyStats, true);
         }
     }
 
@@ -59,8 +59,9 @@ namespace PersistentMapClient {
     BlackMarketChangedAction = 'BtSaveEdit.BlackMarketAccessChanged'
     CompanyTagsChangedAction = 'BtSaveEdit.CompanyTagsChanged'
     StarSystemWarpAction = 'BtSaveEdit.ChangedCurrentStarSystem'*/
+                string GawUsed = "BtSaveEdit.GawUsed";
                 List<string> saveedits = new List<string>() { "BtSaveEdit.FundsAdded", "BtSaveEdit.InventoryAdded", "BtSaveEdit.ReputationChanged",
-                    "BtSaveEdit.MechsAdded", "BtSaveEdit.DebugStatsAccessed" };
+                    "BtSaveEdit.MechsAdded", "BtSaveEdit.DebugStatsAccessed"};
                 foreach (string cheat in saveedits) {
                     if (__instance.CompanyStats.ContainsStatistic(cheat)) {
                         Fields.cheater = true;
@@ -69,7 +70,19 @@ namespace PersistentMapClient {
                         break;
                     }
                 }
-                PersistentMapClient.setCompanyStats(__instance.CompanyStats);
+                var gawTag = __instance.CompanyTags.FirstOrDefault(x => x.StartsWith("GalaxyAtWarSave"));
+                if (!string.IsNullOrEmpty(gawTag))
+                {
+                    __instance.CompanyStats.AddStatistic<int>(GawUsed, 1);
+                }
+                    PersistentMapClient.setCompanyStats(__instance.CompanyStats, false);
+                if(__instance.CommanderStats.ContainsStatistic(GawUsed))
+                {
+                    Fields.cheater = true;
+                    SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(__instance);
+                    interruptQueue.QueueGenericPopup_NonImmediate("Save Invalid", "This Career has been used in Offline/GaW mode and is not able to participate in the Online map", true);
+                }
+
             }
             catch (Exception e) {
                 PersistentMapClient.Logger.LogError(e);
