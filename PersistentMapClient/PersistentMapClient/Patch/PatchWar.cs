@@ -74,6 +74,7 @@ namespace PersistentMapClient {
                 if (!string.IsNullOrEmpty(gawTag))
                 {
                     __instance.CompanyStats.AddStatistic<int>(GawUsed, 1);
+                    Fields.cheater = true;
                 }
                     PersistentMapClient.setCompanyStats(__instance.CompanyStats, false);
                 if(__instance.CommanderStats.ContainsStatistic(GawUsed))
