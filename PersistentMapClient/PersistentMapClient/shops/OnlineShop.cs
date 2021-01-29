@@ -161,6 +161,7 @@ namespace PersistentMapClient.shops
                 pItem.ID = item.ID;
                 pItem.Count = quantity;
                 pItem.Cost = UIControler.GetPrice(item) * quantity;
+                pItem.TransactionId = PersistentMapClient.getBMarketId();
                 Fields.shopItemsSold.Add(item.ID, pItem);
             }
             else
@@ -170,8 +171,14 @@ namespace PersistentMapClient.shops
             }
             try
             {
-                Web.PostBuyItems(Fields.shopItemsSold, RelatedFaction, isBlackMarket);
-                UIControler.DefaultPurshase(this, item, quantity);
+                if (Web.PostBuyItems(Fields.shopItemsSold, RelatedFaction, isBlackMarket))
+                {
+                    UIControler.DefaultPurshase(this, item, quantity);
+                }
+                else
+                {
+                    ret = false;
+                }
             }
             catch (Exception e)
             {

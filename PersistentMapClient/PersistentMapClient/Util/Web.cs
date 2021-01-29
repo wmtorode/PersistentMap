@@ -305,7 +305,15 @@ namespace PersistentMapClient {
                     using (Stream responseStream = response.GetResponseStream())
                     {
                         StreamReader reader = new StreamReader(responseStream);
-                        string mapstring = reader.ReadToEnd();
+                        string pitemString = reader.ReadToEnd();
+                        if (blackMarket)
+                        {
+                            PurchasedItem pItem;
+                            pItem = JsonConvert.DeserializeObject<PurchasedItem>(pitemString);
+                            PersistentMapClient.updateBMarketId(pItem.TransactionId);
+
+                        }
+
                         return true;
                     }
                 }

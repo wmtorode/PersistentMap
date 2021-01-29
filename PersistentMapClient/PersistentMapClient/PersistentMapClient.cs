@@ -15,7 +15,8 @@ namespace PersistentMapClient {
         public static readonly string MISSION_COUNT_STAT = "Pm_SuccessfulPostCount";
         public static readonly string SEASON_STAT = "Pm_PlaySeasonNumber";
         public static readonly string CONSOLE_COUNT = "Pm_ConsoleCount";
-        public const string ClientVersion = "4.0.2-5";
+        public static readonly string BM_TRANSACTION = "Pm_BlkID";
+        public const string ClientVersion = "4.1.0-0";
 
         internal static Logger Logger;
         internal static string ModDirectory;
@@ -90,6 +91,7 @@ namespace PersistentMapClient {
             if (!companyStats.ContainsStatistic(SEASON_STAT)) { companyStats.AddStatistic(SEASON_STAT, Fields.settings.Season); };
             if (!companyStats.ContainsStatistic(MISSION_COUNT_STAT)) { companyStats.AddStatistic(MISSION_COUNT_STAT, 0); };
             if (!companyStats.ContainsStatistic(CONSOLE_COUNT)) { companyStats.AddStatistic(CONSOLE_COUNT, 0); };
+            if (!companyStats.ContainsStatistic(BM_TRANSACTION)) { companyStats.AddStatistic(BM_TRANSACTION, ""); };
 
             Logger.Log($"Career ID Loaded: {companyStats.GetValue<string>(CAREER_ID_STAT)}");
             Logger.Log($"Client issue Token: {RtCore.RTCore.rtData}");
@@ -144,6 +146,24 @@ namespace PersistentMapClient {
                 currentValue++;
                 companyStats.Set<int>(CONSOLE_COUNT, currentValue);
             }
+        }
+
+        public static string getBMarketId()
+        {
+            if (companyStats == null)
+            {
+                return "";
+            }
+            return companyStats.GetValue<string>(BM_TRANSACTION);
+        }
+
+        public static void updateBMarketId(string id)
+        {
+            if (companyStats == null)
+            {
+                return;
+            }
+            companyStats.Set<string>(BM_TRANSACTION, id);
         }
     }
 }
