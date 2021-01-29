@@ -246,12 +246,12 @@ namespace PersistentMapClient {
                     {
                         Fields.FluffDescriptions.Add(system.Name, system.Def.Description.Details);
                     }
-                    if (warsystem.insurrect)
+                    if (warsystem.isInsurrect())
                     {
                     factionList.Add("<b><color=#de0202>System is Insurrect</color></b>\n");
                     }
 
-                    if (warsystem.markSystem)
+                    if (warsystem.hasOnlineEvent())
                     {
                         factionList.Add("<b><color=#8904B1>Online event target</color></b>\n");
                     }

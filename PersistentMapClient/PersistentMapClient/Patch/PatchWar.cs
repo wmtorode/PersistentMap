@@ -479,8 +479,9 @@ namespace PersistentMapClient {
                         if (system2.Tags == null) {
                             PersistentMapClient.Logger.Log(system2.Name + ": Has no Tags");
                         }
-                        if (system.markSystem)
+                        if (system.getMarkerType() != EMarkerTypes.NoMarker)
                         {
+                            // ToDo: setup other markers here
                             MapMarker mapMarker = new MapMarker(system2.ID, Fields.settings.eventMarker);
                             ColourfulFlashPoints.Main.addMapMarker(mapMarker);
                         }

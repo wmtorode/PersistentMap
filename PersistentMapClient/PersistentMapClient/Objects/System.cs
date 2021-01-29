@@ -14,6 +14,7 @@ namespace PersistentMapClient.Objects
         public bool generatesItems = false;
         public List<string> itemsGenerated = new List<string>();
         public int markerType = 0;
+        public List<string> mercStrings = new List<string>();
 
 
         public FactionControl FindFactionControlByFaction(string faction) {
@@ -54,11 +55,27 @@ namespace PersistentMapClient.Objects
             return checkFlag(EMarkerTypes.OnlineEvent);
         }
 
+        public bool isMercTarget()
+        {
+            return checkFlag(EMarkerTypes.MercTarget);
+        }
+
         public EMarkerTypes getMarkerType()
         {
             if (markerType != 0)
             {
-
+                if (isMercTarget())
+                {
+                    return EMarkerTypes.MercTarget;
+                }
+                if (hasOnlineEvent())
+                {
+                    return EMarkerTypes.OnlineEvent;
+                }
+                if (isInsurrect())
+                {
+                    return EMarkerTypes.InsurrectSystem;
+                }
             }
 
             return EMarkerTypes.NoMarker;
