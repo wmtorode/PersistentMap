@@ -77,7 +77,7 @@ namespace PersistentMapClient {
                     Fields.cheater = true;
                 }
                     PersistentMapClient.setCompanyStats(__instance.CompanyStats, false);
-                if(__instance.CommanderStats.ContainsStatistic(GawUsed))
+                if(__instance.CompanyStats.ContainsStatistic(GawUsed))
                 {
                     Fields.cheater = true;
                     SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(__instance);
