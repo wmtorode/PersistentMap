@@ -61,7 +61,7 @@ namespace PersistentMapClient {
     StarSystemWarpAction = 'BtSaveEdit.ChangedCurrentStarSystem'*/
                 string GawUsed = "BtSaveEdit.GawUsed";
                 List<string> saveedits = new List<string>() { "BtSaveEdit.FundsAdded", "BtSaveEdit.InventoryAdded", "BtSaveEdit.ReputationChanged",
-                    "BtSaveEdit.MechsAdded", "BtSaveEdit.DebugStatsAccessed"};
+                    "BtSaveEdit.MechsAdded", "BtSaveEdit.DebugStatsAccessed", "BtSaveEdit.PilotChanged"};
                 foreach (string cheat in saveedits) {
                     if (__instance.CompanyStats.ContainsStatistic(cheat)) {
                         Fields.cheater = true;
