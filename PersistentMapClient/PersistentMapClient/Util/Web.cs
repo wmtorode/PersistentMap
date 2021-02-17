@@ -23,13 +23,15 @@ namespace PersistentMapClient {
             GetServerSettings,
             GetBlackMarket,
             PostBuyBlackMarketItem,
-            GetHpgMail
+            GetHpgMail,
+            PostNonWarResult
         }
 
         private static ServerSettings serverSettings = new ServerSettings();
         private static DateTime nextRefresh = DateTime.UtcNow;
 
         public static string postUrl = "api/roguewarservices/postmissionresult";
+        public static string nonWarUrl = "api/roguewarservices/warmissionupdate";
 
         public static bool CanPostSoldItems()
         {
@@ -352,11 +354,21 @@ namespace PersistentMapClient {
         }
 
         // Send the results of a mission to the server
-        public static bool PostMissionResult(Objects.MissionResult mresult, string companyName, out string errorText) {
+        public static bool PostMissionResult(Objects.MissionResult mresult, string companyName, bool warmission, out string errorText) {
             errorText = "No Error";
             try {
+                WarService post = WarService.PostNonWarResult;
+                if (warmission)
+                {
+                    post = WarService.PostMissionResult;
+                    PersistentMapClient.Logger.Log($"Post as war mission");
+                }
+                else
+                {
+                    PersistentMapClient.Logger.Log($"Post as non-war mission");
+                }
                 string testjson = JsonConvert.SerializeObject(mresult);           
-                HttpWebRequest request = new RequestBuilder(WarService.PostMissionResult).CompanyName(companyName).PostData(testjson).Build();
+                HttpWebRequest request = new RequestBuilder(post).CompanyName(companyName).PostData(testjson).Build();
                 var watch = System.Diagnostics.Stopwatch.StartNew();
                 HttpWebResponse response = request.GetResponse() as HttpWebResponse;
                 watch.Stop();                
@@ -477,6 +489,10 @@ namespace PersistentMapClient {
                         break;
                     case WarService.PostMissionResult:
                         _requestUrl = $"{Fields.settings.ServerURL}{Web.postUrl}";
+                        _requestMethod = "POST";
+                        break;
+                    case WarService.PostNonWarResult:
+                        _requestUrl = $"{Fields.settings.ServerURL}{Web.nonWarUrl}";
                         _requestMethod = "POST";
                         break;
                     case WarService.PostSalvage:
