@@ -74,12 +74,14 @@ namespace PersistentMapClient.shops
                 pItem.Count = quantity;
                 pItem.Cost = UIControler.GetPrice(item) * quantity;
                 pItem.TransactionId = PersistentMapClient.getBMarketId();
+                pItem.remainingFunds = PersistentMapClient.companyStats.GetValue<int>("Funds");
                 Fields.shopItemsSold.Add(item.ID, pItem);
             }
             else
             {
                 Fields.shopItemsSold[item.ID].Count += quantity;
                 Fields.shopItemsSold[item.ID].Cost += UIControler.GetPrice(item) * quantity;
+                Fields.shopItemsSold[item.ID].remainingFunds = PersistentMapClient.companyStats.GetValue<int>("Funds");
             }
             try
             {
