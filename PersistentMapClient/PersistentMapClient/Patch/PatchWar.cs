@@ -481,8 +481,20 @@ namespace PersistentMapClient {
                         }
                         if (system.getMarkerType() != EMarkerTypes.NoMarker)
                         {
-                            // ToDo: setup other markers here
-                            MapMarker mapMarker = new MapMarker(system2.ID, Fields.settings.eventMarker);
+
+                            MapMarker mapMarker;
+                            switch (system.getMarkerType())
+                            {
+                                case EMarkerTypes.InsurrectSystem:
+                                    mapMarker = new MapMarker(system2.ID, Fields.settings.InsurrectMarker);
+                                    break;
+
+                                case EMarkerTypes.OnlineEvent:
+                                default:
+                                    mapMarker = new MapMarker(system2.ID, Fields.settings.eventMarker);
+                                    break;
+
+                            }
                             ColourfulFlashPoints.Main.addMapMarker(mapMarker);
                         }
                         FactionValue newOwner = FactionEnumeration.GetFactionByName(system.owner);

@@ -22,6 +22,7 @@ namespace PersistentMapClient {
         public List<string> immuneSystemEnemies = new List<string> {"Locals", "AuriganPirates" };
         public List<string> cannotBeTarget = new List<string>() { "Solaris7" };
         public FpMarker eventMarker = new FpMarker();
+        public FpMarker InsurrectMarker = new FpMarker();
         public override string ToString() {
             return $"ServerURL:({ServerURL}) ClientID:({ClientID}) Debug:({debug}) PriorityContractPay%:({priorityContactPayPercentage}) PriorityContractsPerAlly:{priorityContractsPerAlly} ActivePlayerMarkerSize:({activePlayerMarkerSize})";
         }

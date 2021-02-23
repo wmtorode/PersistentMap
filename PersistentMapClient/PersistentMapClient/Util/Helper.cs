@@ -337,9 +337,12 @@ namespace PersistentMapClient {
                         .Distinct()
                         .ToList();
                     foreach (FactionValue neighbour in distinctNeighbors)
+                    {
+                        if (!Fields.settings.cannotBeTarget.Contains(neighbour.Name))
                         {
-                        employees.Add(neighbour.Name);
+                            employees.Add(neighbour.Name);
                         }
+                    }
 
                     // If a capital is occupied, add the faction that originally owned the capital to the employer list
                     if (Helper.capitalsBySystemName.Contains(system.Name)) {
@@ -369,7 +372,7 @@ namespace PersistentMapClient {
                         targets.Add(FactionEnumeration.GetFactionByName("Locals").Name);
                     }
                     foreach (StarSystem neigbourSystem in Sim.Starmap.GetAvailableNeighborSystem(system)) {
-                        if (system.OwnerValue != neigbourSystem.OwnerValue && !targets.Contains(neigbourSystem.OwnerValue.Name) && neigbourSystem.OwnerValue != FactionEnumeration.GetNoFactionValue()) {
+                        if (system.OwnerValue != neigbourSystem.OwnerValue && !targets.Contains(neigbourSystem.OwnerValue.Name) && neigbourSystem.OwnerValue != FactionEnumeration.GetNoFactionValue() && !Fields.settings.cannotBeTarget.Contains(neigbourSystem.OwnerValue.Name)) {
                             targets.Add(neigbourSystem.OwnerValue.Name);
                         }
                     }
