@@ -116,6 +116,12 @@ namespace PersistentMapClient {
                         {
                             PersistentMapClient.Logger.Log($"Bypass is active for: {fac}");
                         }
+                        PersistentMapClient.Logger.Log($"Capitals:");
+                        foreach (String fac in serverSettings.Capitals.Keys)
+                        {
+                            PersistentMapClient.Logger.Log($"Faction: {fac}, Capital: {serverSettings.Capitals[fac]}");
+                        }
+                        Helper.updateCaptials(serverSettings.Capitals);
                     }
                     nextRefresh = DateTime.UtcNow.AddMinutes(15);
                 }
@@ -333,6 +339,7 @@ namespace PersistentMapClient {
 
         // Fetch the current state of the starmap
         public static StarMap GetStarMap() {
+            RefreshServerSettings(true);
             try {
                 HttpWebRequest request = new RequestBuilder(WarService.GetStarMap).Build();
                 var watch = System.Diagnostics.Stopwatch.StartNew();

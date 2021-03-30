@@ -346,9 +346,12 @@ namespace PersistentMapClient {
 
                     // If a capital is occupied, add the faction that originally owned the capital to the employer list
                     if (Helper.capitalsBySystemName.Contains(system.Name)) {
-                        string originalCapitalFaction = Helper.capitalsBySystemName[system.Name].First();
-                        if (!employees.Contains(FactionEnumeration.GetFactionByName(originalCapitalFaction).Name)) {
-                            employees.Add(FactionEnumeration.GetFactionByName(originalCapitalFaction).Name);
+                        foreach (string originalCapitalFaction in Helper.capitalsBySystemName[system.Name])
+                        {
+                            if (!employees.Contains(FactionEnumeration.GetFactionByName(originalCapitalFaction).Name))
+                            {
+                                employees.Add(FactionEnumeration.GetFactionByName(originalCapitalFaction).Name);
+                            }
                         }
                     }
                 }
@@ -389,6 +392,12 @@ namespace PersistentMapClient {
                 PersistentMapClient.Logger.LogError(ex);
                 return null;
             }
+        }
+
+        public static void updateCaptials(Dictionary<string, string> capitals)
+        {
+            capitalsByFaction = capitals;
+            capitalsBySystemName = capitalsByFaction.ToLookup(pair => pair.Value, pair => pair.Key);
         }
 
         // Capitals by faction
@@ -435,7 +444,6 @@ namespace PersistentMapClient {
             { "Tortuga", "Tortuga Prime" },
             { "Valkyrate", "Gotterdammerung" },
             { "Axumite", "Thala" },
-            { "WordOfBlake", "EC3040-B42A" },
             {"Illyrian", "Illyria" }
         };
 
@@ -444,8 +452,14 @@ namespace PersistentMapClient {
             bool isCapital = false;
             try {
                 if (capitalsBySystemName.Contains(system.Name)) {
-                    string systemFaction = capitalsBySystemName[system.Name].First();
-                    isCapital = (systemFaction == faction);
+                    foreach (string systemFaction in capitalsBySystemName[system.Name])
+                    {
+                        isCapital = (systemFaction == faction);
+                        if (isCapital)
+                        {
+                            break;
+                        }
+                    }
                 }
             }
             catch (Exception ex) {
