@@ -11,5 +11,7 @@ namespace PersistentMapClient.Objects
         public string ID;
         public int Count;
         public int Cost = 0;
+        public string TransactionId = "";
+        public int remainingFunds = 0;
     }
 }

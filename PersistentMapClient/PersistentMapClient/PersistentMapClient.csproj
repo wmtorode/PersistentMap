@@ -36,6 +36,7 @@
     <Compile Include="HolderClasses.cs" />
     <Compile Include="Objects\ClientReward.cs" />
     <Compile Include="Objects\Company.cs" />
+    <Compile Include="Objects\EMarkerTypes.cs" />
     <Compile Include="Objects\EventMessage.cs" />
     <Compile Include="Objects\FactionControl.cs" />
     <Compile Include="Objects\FactionRewardPopup.cs" />

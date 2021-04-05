@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 
 namespace PersistentMapClient.Objects
@@ -10,10 +11,10 @@ namespace PersistentMapClient.Objects
         public int Players;
         public string owner;
         public bool immuneFromWar;
-        public bool insurrect;
         public bool generatesItems = false;
         public List<string> itemsGenerated = new List<string>();
-        public bool markSystem = false;
+        public int markerType = 0;
+        public List<string> mercStrings = new List<string>();
 
 
         public FactionControl FindFactionControlByFaction(string faction) {
@@ -36,6 +37,48 @@ namespace PersistentMapClient.Objects
             }
             FactionControl result = factions.OrderByDescending(x => x.control).First();
             return result;
+        }
+
+        private bool checkFlag(EMarkerTypes flag)
+        {
+            BitVector32 flags = new BitVector32(markerType);
+            return flags[(int)flag];
+        }
+
+        public bool isInsurrect()
+        {
+            return checkFlag(EMarkerTypes.InsurrectSystem);
+        }
+
+        public bool hasOnlineEvent()
+        {
+            return checkFlag(EMarkerTypes.OnlineEvent);
+        }
+
+        public bool isMercTarget()
+        {
+            return checkFlag(EMarkerTypes.MercTarget);
+        }
+
+        public EMarkerTypes getMarkerType()
+        {
+            if (markerType != 0)
+            {
+                if (isMercTarget())
+                {
+                    return EMarkerTypes.MercTarget;
+                }
+                if (hasOnlineEvent())
+                {
+                    return EMarkerTypes.OnlineEvent;
+                }
+                if (isInsurrect())
+                {
+                    return EMarkerTypes.InsurrectSystem;
+                }
+            }
+
+            return EMarkerTypes.NoMarker;
         }
     }
 }

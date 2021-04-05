@@ -62,7 +62,7 @@ namespace PersistentMapClient {
                 string GawUsed = "BtSaveEdit.GawUsed";
                 string WiicUsed = "BtSaveEdit.WiicUsed";
                 List<string> saveedits = new List<string>() { "BtSaveEdit.FundsAdded", "BtSaveEdit.InventoryAdded", "BtSaveEdit.ReputationChanged",
-                    "BtSaveEdit.MechsAdded", "BtSaveEdit.DebugStatsAccessed"};
+                    "BtSaveEdit.MechsAdded", "BtSaveEdit.DebugStatsAccessed", "BtSaveEdit.PilotChanged"};
                 foreach (string cheat in saveedits) {
                     if (__instance.CompanyStats.ContainsStatistic(cheat)) {
                         Fields.cheater = true;
@@ -486,9 +486,22 @@ namespace PersistentMapClient {
                         if (system2.Tags == null) {
                             PersistentMapClient.Logger.Log(system2.Name + ": Has no Tags");
                         }
-                        if (system.markSystem)
+                        if (system.getMarkerType() != EMarkerTypes.NoMarker)
                         {
-                            MapMarker mapMarker = new MapMarker(system2.ID, Fields.settings.eventMarker);
+
+                            MapMarker mapMarker;
+                            switch (system.getMarkerType())
+                            {
+                                case EMarkerTypes.InsurrectSystem:
+                                    mapMarker = new MapMarker(system2.ID, Fields.settings.InsurrectMarker);
+                                    break;
+
+                                case EMarkerTypes.OnlineEvent:
+                                default:
+                                    mapMarker = new MapMarker(system2.ID, Fields.settings.eventMarker);
+                                    break;
+
+                            }
                             ColourfulFlashPoints.Main.addMapMarker(mapMarker);
                         }
                         FactionValue newOwner = FactionEnumeration.GetFactionByName(system.owner);
@@ -606,6 +619,8 @@ namespace PersistentMapClient {
                 if (!__instance.IsFlashpointContract) {
                     GameInstance game = LazySingletonBehavior<UnityGameInstance>.Instance.Game;
                     bool bypassSupportReq = Web.canBypassSupport(__instance.Override.targetTeam.FactionValue.Name, game.Simulation);
+                    StarSystem system = game.Simulation.StarSystems.Find(x => x.ID == __instance.TargetSystem);
+                    string errorText = "No Error";
                     if (game.Simulation.IsFactionAlly(__instance.Override.employerTeam.FactionValue) || bypassSupportReq) {
                         if (Fields.cheater) {
                             PersistentMapClient.Logger.Log("cheated save, skipping war upload");
@@ -617,8 +632,7 @@ namespace PersistentMapClient {
                             interruptQueue.QueueGenericPopup_NonImmediate("Invalid Mission!", "Something went wrong with your mission, result not uploaded.", true);
                             return;
                         }
-                        bool updated = false;
-                        StarSystem system = game.Simulation.StarSystems.Find(x => x.ID == __instance.TargetSystem);
+                        bool updated = false;                      
                         bool isCapital = Helper.IsCapital(system, __instance.Override.employerTeam.faction);
                         bool isOwner = (system.OwnerValue == __instance.Override.employerTeam.FactionValue) && game.Simulation.IsFactionAlly(__instance.Override.employerTeam.FactionValue);
                         foreach (StarSystem potential in game.Simulation.StarSystems) {
@@ -635,8 +649,7 @@ namespace PersistentMapClient {
                                 Objects.MissionResult mresult = new Objects.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result, 
                                     system.Name, __instance.Difficulty, repchange, planetSupport, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name, cbills, RTCore.RtState, RTCore.RtKey, 
                                     RTCore.rtSalt, RTCore.rtData, Helper.GetCareerModifier(game.Simulation.DifficultySettings), PersistentMapClient.getConsoleCount());
-                                string errorText = "No Error";
-                                bool postSuccessfull = Web.PostMissionResult(mresult, game.Simulation.Player1sMercUnitHeraldryDef.Description.Name, out errorText);
+                                bool postSuccessfull = Web.PostMissionResult(mresult, game.Simulation.Player1sMercUnitHeraldryDef.Description.Name, true, out errorText);
                                 if (!postSuccessfull) {
                                     SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(game.Simulation);
                                     interruptQueue.QueueGenericPopup_NonImmediate("Post Failure", errorText, true);
@@ -655,6 +668,13 @@ namespace PersistentMapClient {
                             SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(game.Simulation);
                             interruptQueue.QueueGenericPopup_NonImmediate("You are surrounded!", "There is no more neighbor system in your factions control, so you didnt earn any influence here.", true);
                         }
+                    }
+                    else
+                    {
+                        Objects.MissionResult mresult = new Objects.MissionResult(__instance.Override.employerTeam.FactionValue, __instance.Override.targetTeam.FactionValue, result,
+                                        system.Name, __instance.Difficulty, 0, 0, PersistentMapClient.getMissionCount(), __instance.ContractTypeValue.Name, PersistentMapClient.companyStats.GetValue<int>("Funds"), RTCore.RtState, RTCore.RtKey,
+                                        RTCore.rtSalt, RTCore.rtData, Helper.GetCareerModifier(game.Simulation.DifficultySettings), PersistentMapClient.getConsoleCount());
+                        bool postSuccessfull = Web.PostMissionResult(mresult, game.Simulation.Player1sMercUnitHeraldryDef.Description.Name, false, out errorText);
                     }
                 }
                 return;
