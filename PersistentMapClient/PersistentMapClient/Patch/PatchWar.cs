@@ -60,6 +60,7 @@ namespace PersistentMapClient {
     CompanyTagsChangedAction = 'BtSaveEdit.CompanyTagsChanged'
     StarSystemWarpAction = 'BtSaveEdit.ChangedCurrentStarSystem'*/
                 string GawUsed = "BtSaveEdit.GawUsed";
+                string WiicUsed = "BtSaveEdit.WiicUsed";
                 List<string> saveedits = new List<string>() { "BtSaveEdit.FundsAdded", "BtSaveEdit.InventoryAdded", "BtSaveEdit.ReputationChanged",
                     "BtSaveEdit.MechsAdded", "BtSaveEdit.DebugStatsAccessed"};
                 foreach (string cheat in saveedits) {
@@ -76,12 +77,18 @@ namespace PersistentMapClient {
                     __instance.CompanyStats.AddStatistic<int>(GawUsed, 1);
                     Fields.cheater = true;
                 }
-                    PersistentMapClient.setCompanyStats(__instance.CompanyStats, false);
-                if(__instance.CommanderStats.ContainsStatistic(GawUsed))
+                var wiccTag = __instance.CompanyTags.FirstOrDefault(x => x.StartsWith("WIIC_enabled"));
+                if (!string.IsNullOrEmpty(wiccTag))
+                {
+                    __instance.CompanyStats.AddStatistic<int>(WiicUsed, 1);
+                    Fields.cheater = true;
+                }
+                PersistentMapClient.setCompanyStats(__instance.CompanyStats, false);
+                if(__instance.CompanyStats.ContainsStatistic(GawUsed))
                 {
                     Fields.cheater = true;
                     SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(__instance);
-                    interruptQueue.QueueGenericPopup_NonImmediate("Save Invalid", "This Career has been used in Offline/GaW mode and is not able to participate in the Online map", true);
+                    interruptQueue.QueueGenericPopup_NonImmediate("Save Invalid", "This Career has been used in Offline(WIIC or GaW) mode and is not able to participate in the Online map", true);
                 }
 
             }
