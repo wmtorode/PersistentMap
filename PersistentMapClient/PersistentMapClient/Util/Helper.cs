@@ -343,9 +343,12 @@ namespace PersistentMapClient {
 
                     // If a capital is occupied, add the faction that originally owned the capital to the employer list
                     if (Helper.capitalsBySystemName.Contains(system.Name)) {
-                        string originalCapitalFaction = Helper.capitalsBySystemName[system.Name].First();
-                        if (!employees.Contains(FactionEnumeration.GetFactionByName(originalCapitalFaction).Name)) {
-                            employees.Add(FactionEnumeration.GetFactionByName(originalCapitalFaction).Name);
+                        foreach (string originalCapitalFaction in Helper.capitalsBySystemName[system.Name])
+                        {
+                            if (!employees.Contains(FactionEnumeration.GetFactionByName(originalCapitalFaction).Name))
+                            {
+                                employees.Add(FactionEnumeration.GetFactionByName(originalCapitalFaction).Name);
+                            }
                         }
                     }
                 }
@@ -404,6 +407,7 @@ namespace PersistentMapClient {
             { "Marian", "Alphard (MH)" },
             { "Lothian", "Lothario" },
             { "AuriganRestoration", "Coromodir" },
+            { "AuriganDirectorate", "Coromodir" },
             { "Steiner", "Tharkad" },
             { "ComStar", "Terra" },
             { "Castile", "Asturias" },
@@ -437,15 +441,25 @@ namespace PersistentMapClient {
         };
 
         private static ILookup<string, string> capitalsBySystemName = capitalsByFaction.ToLookup(pair => pair.Value, pair => pair.Key);
-        public static bool IsCapital(StarSystem system, string faction) {
+        public static bool IsCapital(StarSystem system, string faction)
+        {
             bool isCapital = false;
-            try {
-                if (capitalsBySystemName.Contains(system.Name)) {
-                    string systemFaction = capitalsBySystemName[system.Name].First();
-                    isCapital = (systemFaction == faction);
+            try
+            {
+                if (capitalsBySystemName.Contains(system.Name))
+                {
+                    foreach (string systemFaction in capitalsBySystemName[system.Name])
+                    {
+                        isCapital = (systemFaction == faction);
+                        if (isCapital)
+                        {
+                            break;
+                        }
+                    }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 PersistentMapClient.Logger.LogError(ex);
             }
             return isCapital;
