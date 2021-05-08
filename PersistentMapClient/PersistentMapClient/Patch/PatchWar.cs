@@ -45,6 +45,10 @@ namespace PersistentMapClient {
                     contract.Override.salvagePotential = Mathf.Min(maxPriority, Mathf.RoundToInt(contract.SalvagePotential * Fields.settings.priorityContactPayPercentage));
                     contract.Override.negotiatedSalvage = 1f;
                 }
+                MethodInfo addIgnoredTargets = AccessTools.Method(typeof(SimGameState), "AddCareerModeIgnoredContractTargets");
+                FieldInfo fieldIgnoredTargets = AccessTools.Field(typeof(SimGameState), "ignoredContractTargets");
+                fieldIgnoredTargets.SetValue(__instance, new List<String>());
+                addIgnoredTargets.Invoke(__instance, new object[] { new List<String>() });
                 //tags:
                 /* FundsAddedAction = 'BtSaveEdit.FundsAdded'
     InventoryAddedAction = 'BtSaveEdit.InventoryAdded'
