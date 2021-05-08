@@ -34,6 +34,11 @@ namespace PersistentMapClient {
         // unused for now but might be useful for the future
         public static uint iState = 0;
 
+        public static void setIstateBits(uint bits)
+        {
+            iState = iState | bits;
+        }
+
         public static bool CanPostSoldItems()
         {
             RefreshServerSettings();
