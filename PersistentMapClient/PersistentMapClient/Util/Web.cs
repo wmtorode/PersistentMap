@@ -31,6 +31,9 @@ namespace PersistentMapClient {
 
         public static string postUrl = "api/roguewarservices/postmissionresult";
 
+        // unused for now but might be useful for the future
+        public static int iState = 0;
+
         public static bool CanPostSoldItems()
         {
             RefreshServerSettings();
@@ -520,6 +523,7 @@ namespace PersistentMapClient {
                 string clientId = PersistentMapClient.getClientPostId();
                 request.Headers["X-RT-CLIENT"] =  clientId;
                 request.Headers["X-RT-CLIENT-VERSION"] = PersistentMapClient.ClientVersion;
+                request.Headers["X-RT-ISTATE"] = iState.ToString();
 
                 if (_postJSON != null) {
                     // TODO: Why are we ASCII encoding instead of UTF-8?

@@ -45,20 +45,26 @@ namespace PersistentMapClient {
                     contract.Override.salvagePotential = Mathf.Min(maxPriority, Mathf.RoundToInt(contract.SalvagePotential * Fields.settings.priorityContactPayPercentage));
                     contract.Override.negotiatedSalvage = 1f;
                 }
+                MethodInfo addIgnoredTargets = AccessTools.Method(typeof(SimGameState), "AddCareerModeIgnoredContractTargets");
+                FieldInfo fieldIgnoredTargets = AccessTools.Field(typeof(SimGameState), "ignoredContractTargets");
+                fieldIgnoredTargets.SetValue(__instance, new List<String>());
+                addIgnoredTargets.Invoke(__instance, new object[] { new List<String>() });
+
+
                 //tags:
                 /* FundsAddedAction = 'BtSaveEdit.FundsAdded'
-    InventoryAddedAction = 'BtSaveEdit.InventoryAdded'
-    InventoryDeletedAction = 'BtSaveEdit.InventoryDeleted'
-    PilotChangedAction = 'BtSaveEdit.PilotChanged'
-    ReputationChangedAction = 'BtSaveEdit.ReputationChanged'
-    SaveCleanedAction = 'BtSaveEdit.SaveCleaned'
-    StarSystemsDeletedAction = 'BtSaveEdit.StarSystemsDeleted'
-    ContractsDeletedAction = 'BtSaveEdit.ContractsDeleted'
-    MechsRemovedAction = 'BtSaveEdit.MechsRemoved'
-    MechsAddedAction = 'BtSaveEdit.MechsAdded'
-    BlackMarketChangedAction = 'BtSaveEdit.BlackMarketAccessChanged'
-    CompanyTagsChangedAction = 'BtSaveEdit.CompanyTagsChanged'
-    StarSystemWarpAction = 'BtSaveEdit.ChangedCurrentStarSystem'*/
+        InventoryAddedAction = 'BtSaveEdit.InventoryAdded'
+        InventoryDeletedAction = 'BtSaveEdit.InventoryDeleted'
+        PilotChangedAction = 'BtSaveEdit.PilotChanged'
+        ReputationChangedAction = 'BtSaveEdit.ReputationChanged'
+        SaveCleanedAction = 'BtSaveEdit.SaveCleaned'
+        StarSystemsDeletedAction = 'BtSaveEdit.StarSystemsDeleted'
+        ContractsDeletedAction = 'BtSaveEdit.ContractsDeleted'
+        MechsRemovedAction = 'BtSaveEdit.MechsRemoved'
+        MechsAddedAction = 'BtSaveEdit.MechsAdded'
+        BlackMarketChangedAction = 'BtSaveEdit.BlackMarketAccessChanged'
+        CompanyTagsChangedAction = 'BtSaveEdit.CompanyTagsChanged'
+        StarSystemWarpAction = 'BtSaveEdit.ChangedCurrentStarSystem'*/
                 string GawUsed = "BtSaveEdit.GawUsed";
                 string WiicUsed = "BtSaveEdit.WiicUsed";
                 List<string> saveedits = new List<string>() { "BtSaveEdit.FundsAdded", "BtSaveEdit.InventoryAdded", "BtSaveEdit.ReputationChanged",
