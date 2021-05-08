@@ -32,7 +32,7 @@ namespace PersistentMapClient {
         public static string postUrl = "api/roguewarservices/postmissionresult";
 
         // unused for now but might be useful for the future
-        public static int iState = 0;
+        public static uint iState = 0;
 
         public static bool CanPostSoldItems()
         {
