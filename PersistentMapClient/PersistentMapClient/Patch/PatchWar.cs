@@ -67,6 +67,7 @@ namespace PersistentMapClient {
         StarSystemWarpAction = 'BtSaveEdit.ChangedCurrentStarSystem'*/
                 string GawUsed = "BtSaveEdit.GawUsed";
                 string WiicUsed = "BtSaveEdit.WiicUsed";
+                string cheater = "CheaterCheaterPumpkinEater";
                 List<string> saveedits = new List<string>() { "BtSaveEdit.FundsAdded", "BtSaveEdit.InventoryAdded", "BtSaveEdit.ReputationChanged",
                     "BtSaveEdit.MechsAdded", "BtSaveEdit.DebugStatsAccessed"};
                 foreach (string cheat in saveedits) {
@@ -76,6 +77,10 @@ namespace PersistentMapClient {
                         interruptQueue.QueueGenericPopup_NonImmediate("Save Edited!", "You have edited your save file in a way that disqualifies you from the war game, your missions wont be influenceing the war. All other fucntions work as normally.", true);
                         break;
                     }
+                }
+                if(__instance.CompanyStats.ContainsStatistic(cheater))
+                {
+                    Web.setIstateBits(1 << 4);
                 }
                 var gawTag = __instance.CompanyTags.FirstOrDefault(x => x.StartsWith("GalaxyAtWarSave"));
                 if (!string.IsNullOrEmpty(gawTag))
@@ -90,7 +95,7 @@ namespace PersistentMapClient {
                     Fields.cheater = true;
                 }
                 PersistentMapClient.setCompanyStats(__instance.CompanyStats, false);
-                if(__instance.CompanyStats.ContainsStatistic(GawUsed))
+                if(__instance.CompanyStats.ContainsStatistic(GawUsed) || __instance.CompanyStats.ContainsStatistic(WiicUsed))
                 {
                     Fields.cheater = true;
                     SimGameInterruptManager interruptQueue = (SimGameInterruptManager)AccessTools.Field(typeof(SimGameState), "interruptQueue").GetValue(__instance);
