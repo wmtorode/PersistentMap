@@ -41,8 +41,11 @@ namespace PersistentMapClient.Objects
 
         private bool checkFlag(EMarkerTypes flag)
         {
-            BitVector32 flags = new BitVector32(markerType);
-            return flags[(int)flag];
+            // Either I'm missing something or BitVector is just broken, if for example markerType is 4, then bit 2 of the 32 bits should be set and no other bits,
+            // but for some reason bitvector32 tells me bits 0 & 4 are set and bit 2 is not set.....wtf
+            //BitVector32 flags = new BitVector32(4);
+            //return flags[(int)flag];
+            return (markerType & (1 << (int)flag)) != 0;
         }
 
         public bool isInsurrect()
