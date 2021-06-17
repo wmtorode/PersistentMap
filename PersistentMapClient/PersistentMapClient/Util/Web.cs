@@ -452,6 +452,12 @@ namespace PersistentMapClient {
                     case (HttpStatusCode)473:
                         errorText = "Critical mission data not available, if you are Mac or Linux please file a support ticket on discord. If on Windows restart RogueTech";
                         break;
+                    case (HttpStatusCode)474:
+                        errorText = "Unknown Client version, please make sure RogueTech is up to date and make a ticket if this still occurs";
+                        break;
+                    case (HttpStatusCode)475:
+                        errorText = "Mission results could not be posted because a seasonal break is in affect, check the roguewar discord for announcements of when this break will end and mission posts can resume";
+                        break;
                     default:
                         errorText = "Unknown Error, your install may be out of date, if not make a discord ticket";
                         break;
